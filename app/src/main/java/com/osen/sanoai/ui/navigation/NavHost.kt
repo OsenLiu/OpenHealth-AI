@@ -2,16 +2,24 @@ package com.osen.sanoai.ui.navigation
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Chat
-import androidx.compose.material.icons.filled.Dashboard
-import androidx.compose.material.icons.filled.FitnessCenter
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Chat
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.ChatBubbleOutline
+import androidx.compose.material.icons.rounded.Settings
+import androidx.compose.material.icons.rounded.Spa
+import androidx.compose.material.icons.rounded.StarOutline
+import androidx.compose.material.icons.rounded.Waves
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
@@ -30,59 +38,77 @@ fun SanoNavHost(viewModel: HealthViewModel) {
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                val currentKey = backStack.lastOrNull()
-                NavigationBarItem(
-                    selected = currentKey == Destination.Dashboard,
-                    onClick = { 
-                        if (currentKey != Destination.Dashboard) {
-                            backStack.clear()
-                            backStack.add(Destination.Dashboard)
-                        }
-                    },
-                    icon = { Icon(Icons.Default.Dashboard, "Dashboard") },
-                    label = { Text("Home") }
-                )
-                NavigationBarItem(
-                    selected = currentKey == Destination.FoodLog,
-                    onClick = { 
-                        if (currentKey != Destination.FoodLog) {
-                            backStack.add(Destination.FoodLog)
-                        }
-                    },
-                    icon = { Icon(Icons.Default.Restaurant, "Food") },
-                    label = { Text("Food") }
-                )
-                NavigationBarItem(
-                    selected = currentKey == Destination.ExerciseLog,
-                    onClick = { 
-                        if (currentKey != Destination.ExerciseLog) {
-                            backStack.add(Destination.ExerciseLog)
-                        }
-                    },
-                    icon = { Icon(Icons.Default.FitnessCenter, "Exercise") },
-                    label = { Text("Exercise") }
-                )
-                NavigationBarItem(
-                    selected = currentKey == Destination.Chat,
-                    onClick = { 
-                        if (currentKey != Destination.Chat) {
-                            backStack.add(Destination.Chat)
-                        }
-                    },
-                    icon = { Icon(Icons.AutoMirrored.Filled.Chat, "Chat") },
-                    label = { Text("Chat") }
-                )
-                NavigationBarItem(
-                    selected = currentKey == Destination.Settings,
-                    onClick = { 
-                        if (currentKey != Destination.Settings) {
-                            backStack.add(Destination.Settings)
-                        }
-                    },
-                    icon = { Icon(Icons.Default.Settings, "Settings") },
-                    label = { Text("Settings") }
-                )
+            Surface(
+                modifier = Modifier
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(32.dp)),
+                tonalElevation = 8.dp,
+                color = Color.White.copy(alpha = 0.9f)
+            ) {
+                NavigationBar(
+                    containerColor = Color.Transparent,
+                    contentColor = MaterialTheme.colorScheme.onSurface
+                ) {
+                    val currentKey = backStack.lastOrNull()
+                    
+                    NavigationBarItem(
+                        selected = currentKey == Destination.Dashboard,
+                        onClick = { 
+                            if (currentKey != Destination.Dashboard) {
+                                backStack.clear()
+                                backStack.add(Destination.Dashboard)
+                            }
+                        },
+                        icon = { Icon(Icons.Rounded.Spa, "Home", modifier = Modifier.size(28.dp)) },
+                        label = { Text("Lotus") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFFD84315),
+                            indicatorColor = Color(0xFFFFE0B2)
+                        )
+                    )
+                    NavigationBarItem(
+                        selected = currentKey == Destination.FoodLog || currentKey == Destination.ExerciseLog,
+                        onClick = { 
+                            if (currentKey != Destination.FoodLog) {
+                                backStack.add(Destination.FoodLog)
+                            }
+                        },
+                        icon = { Icon(Icons.Rounded.Waves, "Activity", modifier = Modifier.size(28.dp)) },
+                        label = { Text("Wave") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFF00796B),
+                            indicatorColor = Color(0xFFB2DFDB)
+                        )
+                    )
+                    NavigationBarItem(
+                        selected = currentKey == Destination.Chat,
+                        onClick = { 
+                            if (currentKey != Destination.Chat) {
+                                backStack.add(Destination.Chat)
+                            }
+                        },
+                        icon = { Icon(Icons.Rounded.StarOutline, "Chat", modifier = Modifier.size(28.dp)) },
+                        label = { Text("Star") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFF0277BD),
+                            indicatorColor = Color(0xFFB3E5FC)
+                        )
+                    )
+                    NavigationBarItem(
+                        selected = currentKey == Destination.Settings,
+                        onClick = { 
+                            if (currentKey != Destination.Settings) {
+                                backStack.add(Destination.Settings)
+                            }
+                        },
+                        icon = { Icon(Icons.Rounded.Settings, "Settings", modifier = Modifier.size(28.dp)) },
+                        label = { Text("Gear") },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = Color(0xFF5D4037),
+                            indicatorColor = Color(0xFFD7CCC8)
+                        )
+                    )
+                }
             }
         }
     ) { padding ->

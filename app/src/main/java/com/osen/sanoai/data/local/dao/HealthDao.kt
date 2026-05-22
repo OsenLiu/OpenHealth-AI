@@ -1,6 +1,7 @@
 package com.osen.sanoai.data.local.dao
 
 import androidx.room.*
+import com.osen.sanoai.data.local.entities.DailySuggestion
 import com.osen.sanoai.data.local.entities.ExerciseLog
 import com.osen.sanoai.data.local.entities.FoodLog
 import com.osen.sanoai.data.local.entities.UserProfile
@@ -46,4 +47,11 @@ interface HealthDao {
 
     @Delete
     suspend fun deleteExerciseLog(log: ExerciseLog)
+
+    // Daily Suggestions
+    @Query("SELECT * FROM daily_suggestions WHERE date = :date")
+    suspend fun getSuggestionByDate(date: String): DailySuggestion?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSuggestion(suggestion: DailySuggestion)
 }

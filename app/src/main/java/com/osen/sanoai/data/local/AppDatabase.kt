@@ -3,6 +3,7 @@ package com.osen.sanoai.data.local
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.osen.sanoai.data.local.dao.HealthDao
+import com.osen.sanoai.data.local.entities.DailySuggestion
 import com.osen.sanoai.data.local.entities.ExerciseLog
 import com.osen.sanoai.data.local.entities.FoodLog
 import com.osen.sanoai.data.local.entities.UserProfile
@@ -13,9 +14,10 @@ import com.osen.sanoai.data.local.entities.WeightRecord
         UserProfile::class,
         WeightRecord::class,
         FoodLog::class,
-        ExerciseLog::class
+        ExerciseLog::class,
+        DailySuggestion::class
     ],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

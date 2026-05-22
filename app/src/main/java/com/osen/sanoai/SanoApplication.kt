@@ -22,7 +22,7 @@ class SanoApplication : Application() {
             this,
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
-        ).build()
+        ).fallbackToDestructiveMigration().build()
 
         val secureStorage = SecureStorage(this)
         val aiRepository = AiRepository(

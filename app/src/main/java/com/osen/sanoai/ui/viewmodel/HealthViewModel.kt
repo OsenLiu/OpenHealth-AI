@@ -6,20 +6,29 @@ import androidx.lifecycle.viewModelScope
 import com.osen.sanoai.data.api.AiProvider
 import com.osen.sanoai.data.api.model.FoodAnalysisResponse
 import com.osen.sanoai.data.backup.GoogleDriveService
+import com.osen.sanoai.data.local.entities.DailySuggestion
 import com.osen.sanoai.data.local.entities.ExerciseLog
 import com.osen.sanoai.data.local.entities.FoodLog
 import com.osen.sanoai.data.local.entities.UserProfile
 import com.osen.sanoai.data.local.entities.WeightRecord
 import com.osen.sanoai.data.repository.HealthRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class HealthViewModel(
     val repository: HealthRepository,
     private val googleDriveService: GoogleDriveService
 ) : ViewModel() {
+
+    private val _suggestionState = MutableStateFlow("Loading suggestions...")
+    val suggestionState: StateFlow<String> = _suggestionState.asStateFlow()
 
     val userProfile: StateFlow<UserProfile?> = repository.getUserProfile()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
@@ -67,10 +76,37 @@ class HealthViewModel(
     suspend fun analyzeExercise(description: String, provider: AiProvider) = 
         repository.analyzeExercise(description, provider)
 
+    fun fetchDailySuggestion(provider: AiProvider, forceRefresh: Boolean = false) {
+        viewModelScope.launch {
+            val dateKey = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            
+            if (!forceRefresh) {
+                val cached = repository.getCachedSuggestion(dateKey)
+                if (cached != null) {
+                    _suggestionState.value = cached.suggestion
+                    return@launch
+                }
+            }
+
+            _suggestionState.value = "Consulting AI..."
+            val profile = userProfile.value?.toString() ?: "No profile"
+            val logs = "Food: ${foodLogs.value.take(5)}, Exercise: ${exerciseLogs.value.take(5)}"
+            val suggestionResponse = repository.generateHealthSuggestion(profile, logs, provider)
+            
+            val suggestionText = suggestionResponse?.suggestion ?: "Keep going!"
+            _suggestionState.value = suggestionText
+            
+            repository.saveSuggestion(DailySuggestion(
+                date = dateKey,
+                suggestion = suggestionText,
+                timestamp = System.currentTimeMillis()
+            ))
+        }
+    }
+
+    // Deprecated for fetchDailySuggestion
     suspend fun getSuggestion(provider: AiProvider): String {
-        val profile = userProfile.value?.toString() ?: "No profile"
-        val logs = "Food: ${foodLogs.value.take(5)}, Exercise: ${exerciseLogs.value.take(5)}"
-        return repository.generateHealthSuggestion(profile, logs, provider)?.suggestion ?: "Keep going!"
+        return "Please use suggestionState and fetchDailySuggestion"
     }
 
     fun backup(accountName: String, onResult: (Boolean) -> Unit) {

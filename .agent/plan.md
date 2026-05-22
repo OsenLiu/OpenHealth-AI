@@ -1,30 +1,30 @@
 # Project Plan
 
-SanoAI: An Android app to monitor health and provide suggestions using AI. 
-Includes a new AI Health Consultant Chat feature for personalized health and sports advice.
-Existing features: Food/Exercise tracking (AI), Multi-model support, Google Drive backup, Unit tests.
+Redesign SanoAI's UI to match the 'VitaMind' reference image. 
+Requirements:
+- Soft, organic 'blob' shapes for dashboard cards.
+- Warm pastel palette (Beige, Mint, Sky Blue, Coral).
+- Speech-bubble style AI Health Assistant Advice card.
+- Stylized navigation icons.
+- Modern, calming, and high-energy aesthetic.
 
 ## Project Brief
 
-# SanoAI Project Brief
+# SanoAI Project Brief (UI Redesign)
 
 ## Features
-1. **AI Health Consultant Chat**: A contextual chat interface where users can ask health or sports questions. The AI provides personalized advice by referencing the user's recent activity logs and physical profile.
-2. **Smart Nutrition & Activity Tracking**: Effortlessly log meals using AI-powered photo estimation (CameraX) or manual entry, and track exercises with AI-driven calorie burn calculations.
-3. **Multi-Model AI Configuration**: Support for Gemini, OpenAI, and BytePlus models, allowing users to provide their own API keys which are stored using local encryption.
-4. **Daily AI Recommendations**: Automated generation of health and fitness suggestions each day, tailored specifically to the user's goals and historical data.
-5. **Secure Local Storage & Backup**: Data is persisted in a local Room database with the ability to perform manual or automated backups to the user's Google Drive.
+1. **Context-Aware AI Health Chat**: Personalized advice based on activity and profile.
+2. **Intelligent Logging**: Photo-based nutrition and exercise estimation.
+3. **Multi-Model Support**: Gemini, OpenAI, BytePlus with secure key storage.
+4. **Organic Health Dashboard**: Soft shapes, pastel colors, and speech-bubble AI advice.
+5. **Secure Persistence**: Room DB + Google Drive backup.
+
+## UI Design Reference
+![UI Style Reference](/Users/osenliu/project/Project-OpenHealth-AI/input_images/image_0.png)
 
 ## High-Level Technical Stack
-- **Language**: Kotlin
-- **UI Framework**: Jetpack Compose (Material Design 3 with Full Edge-to-Edge)
-- **Navigation**: Jetpack Navigation 3 (State-driven)
-- **Adaptive Strategy**: Compose Material Adaptive library for responsive layouts across devices
-- **Concurrency**: Kotlin Coroutines & Flow
-- **Local Persistence**: Room DB (for health logs, profiles, and encrypted API key storage)
-- **Camera Integration**: CameraX for nutrition photo analysis
-- **Cloud Integration**: Google Drive API for database backups
-- **Networking**: Retrofit & OkHttp for AI model communication
+- Kotlin, Jetpack Compose, Material 3.
+- Navigation 3, Room, CameraX, Google Drive API.
 
 ## Implementation Steps
 
@@ -105,5 +105,29 @@ Existing features: Food/Exercise tracking (AI), Multi-model support, Google Driv
   - Build pass, all tests pass.
   - App does not crash.
   - Final Run and Verify: Chat feature works as expected, application stability confirmed.
+
+### Task_9_DesignSystemRedesign: Implement the 'VitaMind' design system including the warm pastel palette, organic 'blob' shapes, and stylized icons.
+- **Status:** COMPLETED
+- **Updates:** Implemented the 'VitaMind' design system:
+- **Acceptance Criteria:**
+  - Material 3 theme updated with warm pastel palette (Beige, Mint, Sky Blue, Coral).
+  - Custom organic 'blob' shapes and speech-bubble components implemented.
+  - Stylized navigation icons integrated.
+  - The implemented UI must match the design provided in /Users/osenliu/project/Project-OpenHealth-AI/input_images/image_0.png.
+
+### Task_10_ScreenRefactorVerification: Apply the new design language to all app screens and perform final stability verification.
+- **Status:** COMPLETED
+- **Updates:** Full refactoring to 'VitaMind' design system completed:
+- Dashboard, Chat, and Logging screens updated with organic shapes and pastel palette.
+- AI Health Assistant Advice card implemented as a speech bubble.
+- Navigation bar updated with thematic icons.
+- Verified 18/18 unit tests pass and project builds successfully.
+- Code analysis confirms high fidelity to the /Users/osenliu/project/Project-OpenHealth-AI/input_images/image_0.png reference.
+- App is stable with full edge-to-edge support.
+- **Acceptance Criteria:**
+  - Dashboard, Chat, and Logging screens updated with soft organic shapes and pastel colors.
+  - AI Health Assistant Advice card redesigned as a speech-bubble.
+  - All existing tests pass, build pass, and app does not crash.
+  - Final Run and Verify: App is stable, UI matches reference, and no critical issues found.
 - **Duration:** N/A
 

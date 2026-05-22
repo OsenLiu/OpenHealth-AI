@@ -5,20 +5,23 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.DriveScopes
 import com.osen.sanoai.data.local.entities.UserProfile
 import com.osen.sanoai.data.secure.SecureStorage
+import com.osen.sanoai.ui.components.VitaTextField
+import com.osen.sanoai.ui.theme.*
 import com.osen.sanoai.ui.viewmodel.HealthViewModel
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,53 +52,67 @@ fun SettingsScreen(viewModel: HealthViewModel) {
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Settings") }) }
+        topBar = {
+            TopAppBar(
+                title = { Text("Settings", color = VitaMindDarkBrown) },
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = VitaMindBackground)
+            )
+        },
+        containerColor = VitaMindBackground
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(16.dp)
+                .padding(24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Text("User Profile", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(value = weight, onValueChange = { weight = it }, label = { Text("Weight (kg)") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = height, onValueChange = { height = it }, label = { Text("Height (cm)") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = bodyFat, onValueChange = { bodyFat = it }, label = { Text("Body Fat (%)") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = goal, onValueChange = { goal = it }, label = { Text("Health Goal") }, modifier = Modifier.fillMaxWidth())
+            Text("User Profile", style = MaterialTheme.typography.titleLarge, color = VitaMindDarkBrown)
+            Spacer(modifier = Modifier.height(16.dp))
+            VitaTextField(value = weight, onValueChange = { weight = it }, label = "Weight (kg)")
+            Spacer(modifier = Modifier.height(12.dp))
+            VitaTextField(value = height, onValueChange = { height = it }, label = "Height (cm)")
+            Spacer(modifier = Modifier.height(12.dp))
+            VitaTextField(value = bodyFat, onValueChange = { bodyFat = it }, label = "Body Fat (%)")
+            Spacer(modifier = Modifier.height(12.dp))
+            VitaTextField(value = goal, onValueChange = { goal = it }, label = "Health Goal")
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("AI API Keys", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(8.dp))
-            OutlinedTextField(
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("AI API Keys", style = MaterialTheme.typography.titleLarge, color = VitaMindDarkBrown)
+            Spacer(modifier = Modifier.height(16.dp))
+            VitaTextField(
                 value = geminiKey,
                 onValueChange = { geminiKey = it },
-                label = { Text("Gemini API Key") },
-                modifier = Modifier.fillMaxWidth(),
+                label = "Gemini API Key",
                 visualTransformation = PasswordVisualTransformation()
             )
-            OutlinedTextField(
+            Spacer(modifier = Modifier.height(12.dp))
+            VitaTextField(
                 value = openaiKey,
                 onValueChange = { openaiKey = it },
-                label = { Text("OpenAI API Key") },
-                modifier = Modifier.fillMaxWidth(),
+                label = "OpenAI API Key",
                 visualTransformation = PasswordVisualTransformation()
             )
-            OutlinedTextField(
+            Spacer(modifier = Modifier.height(12.dp))
+            VitaTextField(
                 value = byteplusKey,
                 onValueChange = { byteplusKey = it },
-                label = { Text("BytePlus API Key") },
-                modifier = Modifier.fillMaxWidth(),
+                label = "BytePlus API Key",
                 visualTransformation = PasswordVisualTransformation()
             )
 
-            Spacer(modifier = Modifier.height(24.dp))
-            Text("Data Backup (Google Drive)", style = MaterialTheme.typography.titleLarge)
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(onClick = { launcher.launch(googleSignInClient.signInIntent) }, modifier = Modifier.fillMaxWidth()) {
-                Text("Connect Google Account")
+            Spacer(modifier = Modifier.height(32.dp))
+            Text("Data Backup (Google Drive)", style = MaterialTheme.typography.titleLarge, color = VitaMindDarkBrown)
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(
+                onClick = { launcher.launch(googleSignInClient.signInIntent) },
+                modifier = Modifier.fillMaxWidth().height(48.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = VitaMindSkyBlue),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Text("Connect Google Account", color = VitaMindDarkBrown)
             }
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 Button(
                     onClick = {
                         val account = GoogleSignIn.getLastSignedInAccount(context)
@@ -107,9 +124,11 @@ fun SettingsScreen(viewModel: HealthViewModel) {
                             Toast.makeText(context, "Please sign in first", Toast.LENGTH_SHORT).show()
                         }
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = VitaMindMint),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Backup")
+                    Text("Backup", color = VitaMindDarkBrown)
                 }
                 Button(
                     onClick = {
@@ -122,13 +141,15 @@ fun SettingsScreen(viewModel: HealthViewModel) {
                             Toast.makeText(context, "Please sign in first", Toast.LENGTH_SHORT).show()
                         }
                     },
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).height(48.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = VitaMindMint),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Restore")
+                    Text("Restore", color = VitaMindDarkBrown)
                 }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(40.dp))
             Button(
                 onClick = {
                     viewModel.saveProfile(UserProfile(
@@ -141,9 +162,11 @@ fun SettingsScreen(viewModel: HealthViewModel) {
                     viewModel.saveApiKey(SecureStorage.KEY_OPENAI, openaiKey)
                     viewModel.saveApiKey(SecureStorage.KEY_BYTEPLUS, byteplusKey)
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth().height(56.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = VitaMindCoral),
+                shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Save All Settings")
+                Text("Save All Settings", color = VitaMindDarkBrown, style = MaterialTheme.typography.titleMedium)
             }
             Spacer(modifier = Modifier.height(32.dp))
         }

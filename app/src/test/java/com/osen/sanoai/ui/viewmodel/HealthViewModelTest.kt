@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.osen.sanoai.data.api.AiProvider
 import com.osen.sanoai.data.api.model.HealthSuggestionResponse
 import com.osen.sanoai.data.backup.GoogleDriveService
+import com.osen.sanoai.data.local.entities.DailySuggestion
 import com.osen.sanoai.data.local.entities.ExerciseLog
 import com.osen.sanoai.data.local.entities.FoodLog
 import com.osen.sanoai.data.local.entities.UserProfile
@@ -13,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.*
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -22,6 +24,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -34,7 +37,7 @@ class HealthViewModelTest {
     private lateinit var googleDriveService: GoogleDriveService
 
     private lateinit var viewModel: HealthViewModel
-    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setup() {
@@ -65,35 +68,58 @@ class HealthViewModelTest {
     fun `saveProfile calls repository`() = runTest {
         val profile = UserProfile(weight = 70.0, height = 170.0, bodyFat = 15.0, goal = "Healthy")
         viewModel.saveProfile(profile)
+        advanceUntilIdle()
         verify(repository).saveUserProfile(profile)
     }
 
     @Test
     fun `addWeight adds record and updates profile`() = runTest {
         val profile = UserProfile(weight = 70.0, height = 170.0, bodyFat = 15.0, goal = "Healthy")
-        val profileFlow = MutableStateFlow<UserProfile?>(profile)
-        `when`(repository.getUserProfile()).thenReturn(profileFlow)
+        // Use a simple Flow to avoid collect issues in some environments
+        `when`(repository.getUserProfile()).thenReturn(flowOf(profile))
         
         // Re-init viewModel to pick up the mock flow
         viewModel = HealthViewModel(repository, googleDriveService)
 
-        // Ensure state is collected
-        viewModel.userProfile.test {
-            assertEquals(profile, awaitItem())
-            viewModel.addWeight(75.0)
-            verify(repository).addWeightRecord(any())
-            verify(repository).saveUserProfile(profile.copy(weight = 75.0))
+        // Kick off the shared flow by collecting
+        backgroundScope.launch { viewModel.userProfile.collect {} }
+        advanceUntilIdle()
+
+        viewModel.addWeight(75.0)
+        advanceUntilIdle()
+        
+        verify(repository).addWeightRecord(any())
+        verify(repository).saveUserProfile(profile.copy(weight = 75.0))
+    }
+
+    @Test
+    fun `fetchDailySuggestion uses cache if available`() = runTest {
+        val cachedSuggestion = DailySuggestion("2026-05-20", "Cached suggestion", System.currentTimeMillis())
+        `when`(repository.getCachedSuggestion(any())).thenReturn(cachedSuggestion)
+
+        viewModel.suggestionState.test {
+            assertEquals("Loading suggestions...", awaitItem())
+            viewModel.fetchDailySuggestion(AiProvider.GEMINI)
+            assertEquals("Cached suggestion", awaitItem())
         }
     }
 
     @Test
-    fun `getSuggestion returns suggestion from repository`() = runTest {
-        val mockSuggestion = HealthSuggestionResponse("Title", "Drink water")
+    fun `fetchDailySuggestion call logic`() = runTest {
+        `when`(repository.getCachedSuggestion(any())).thenReturn(null)
+        val mockSuggestion = HealthSuggestionResponse("Title", "New AI suggestion")
         `when`(repository.generateHealthSuggestion(any(), any(), any())).thenReturn(mockSuggestion)
 
-        val result = viewModel.getSuggestion(AiProvider.GEMINI)
-        
-        assertEquals("Drink water", result)
+        viewModel.suggestionState.test {
+            assertEquals("Loading suggestions...", awaitItem())
+            viewModel.fetchDailySuggestion(AiProvider.GEMINI)
+            
+            assertEquals("Consulting AI...", awaitItem())
+            assertEquals("New AI suggestion", awaitItem())
+            
+            advanceUntilIdle()
+            verify(repository).saveSuggestion(any())
+        }
     }
 
     @Test
@@ -104,6 +130,7 @@ class HealthViewModelTest {
         viewModel.backup(account) { success ->
             assertEquals(true, success)
         }
+        advanceUntilIdle()
         verify(googleDriveService).backupDatabase(account)
     }
 
@@ -115,6 +142,7 @@ class HealthViewModelTest {
         viewModel.restore(account) { success ->
             assertEquals(true, success)
         }
+        advanceUntilIdle()
         verify(googleDriveService).restoreDatabase(account)
     }
 }

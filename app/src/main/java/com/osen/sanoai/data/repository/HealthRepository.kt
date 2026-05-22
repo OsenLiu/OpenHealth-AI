@@ -5,6 +5,7 @@ import com.osen.sanoai.data.api.AiProvider
 import com.osen.sanoai.data.api.AiRepository
 import com.osen.sanoai.data.api.model.ChatMessage
 import com.osen.sanoai.data.local.dao.HealthDao
+import com.osen.sanoai.data.local.entities.DailySuggestion
 import com.osen.sanoai.data.local.entities.ExerciseLog
 import com.osen.sanoai.data.local.entities.FoodLog
 import com.osen.sanoai.data.local.entities.UserProfile
@@ -48,4 +49,8 @@ class HealthRepository(
     // API Keys
     fun saveApiKey(provider: String, apiKey: String) = secureStorage.saveApiKey(provider, apiKey)
     fun getApiKey(provider: String): String? = secureStorage.getApiKey(provider)
+
+    // Cached Suggestions
+    suspend fun getCachedSuggestion(date: String): DailySuggestion? = healthDao.getSuggestionByDate(date)
+    suspend fun saveSuggestion(suggestion: DailySuggestion) = healthDao.insertSuggestion(suggestion)
 }

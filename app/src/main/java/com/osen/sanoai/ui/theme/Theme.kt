@@ -11,48 +11,41 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = EmeraldPrimaryDark,
-    onPrimary = EmeraldOnPrimaryDark,
-    primaryContainer = EmeraldPrimaryContainerDark,
-    onPrimaryContainer = EmeraldOnPrimaryContainerDark,
-    secondary = EmeraldSecondaryDark,
-    onSecondary = EmeraldOnSecondaryDark,
-    secondaryContainer = EmeraldSecondaryContainerDark,
-    onSecondaryContainer = EmeraldOnSecondaryContainerDark,
-    tertiary = EmeraldTertiaryDark,
-    onTertiary = EmeraldOnTertiaryDark,
-    tertiaryContainer = EmeraldTertiaryContainerDark,
-    onTertiaryContainer = EmeraldOnTertiaryContainerDark
+    primary = PrimaryDark,
+    onPrimary = OnPrimaryDark,
+    secondary = SecondaryDark,
+    tertiary = TertiaryDark,
+    background = BackgroundDark,
+    onBackground = OnBackgroundDark
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = EmeraldPrimaryLight,
-    onPrimary = EmeraldOnPrimaryLight,
-    primaryContainer = EmeraldPrimaryContainerLight,
-    onPrimaryContainer = EmeraldOnPrimaryContainerLight,
-    secondary = EmeraldSecondaryLight,
-    onSecondary = EmeraldOnSecondaryLight,
-    secondaryContainer = EmeraldSecondaryContainerLight,
-    onSecondaryContainer = EmeraldOnSecondaryContainerLight,
-    tertiary = EmeraldTertiaryLight,
-    onTertiary = EmeraldOnTertiaryLight,
-    tertiaryContainer = EmeraldTertiaryContainerLight,
-    onTertiaryContainer = EmeraldOnTertiaryContainerLight
+    primary = PrimaryLight,
+    onPrimary = OnPrimaryLight,
+    primaryContainer = PrimaryContainerLight,
+    onPrimaryContainer = OnPrimaryContainerLight,
+    secondary = SecondaryLight,
+    onSecondary = OnSecondaryLight,
+    secondaryContainer = SecondaryContainerLight,
+    onSecondaryContainer = OnSecondaryContainerLight,
+    tertiary = TertiaryLight,
+    onTertiary = OnTertiaryLight,
+    tertiaryContainer = TertiaryContainerLight,
+    onTertiaryContainer = OnTertiaryContainerLight,
+    background = BackgroundLight,
+    onBackground = OnBackgroundLight,
+    surface = SurfaceLight,
+    onSurface = OnSurfaceLight
 )
 
 @Composable
 fun SanoAITheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Allow user to disable dynamic color if they want our vibrant green specific theme
-    dynamicColor: Boolean = false,
+    darkTheme: Boolean = false, // Force Light Mode for VitaMind aesthetic
+    dynamicColor: Boolean = false, // Prefer our specific 'VitaMind' palette
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
+        // dynamicColor check removed to prevent system override of pastel palette
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }

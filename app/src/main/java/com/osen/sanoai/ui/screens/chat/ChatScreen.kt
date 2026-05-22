@@ -13,9 +13,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.osen.sanoai.data.api.AiProvider
 import com.osen.sanoai.data.api.model.ChatMessage
+import com.osen.sanoai.ui.components.OrganicBlobShape
+import com.osen.sanoai.ui.theme.*
 import com.osen.sanoai.ui.viewmodel.ChatViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +29,6 @@ fun ChatScreen(viewModel: ChatViewModel) {
     var inputText by remember { mutableStateOf("") }
     val listState = rememberLazyListState()
 
-    // Scroll to bottom when new messages arrive
     LaunchedEffect(uiState.messages.size) {
         if (uiState.messages.isNotEmpty()) {
             listState.animateScrollToItem(uiState.messages.size - 1)
@@ -35,18 +38,21 @@ fun ChatScreen(viewModel: ChatViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("AI Health Consultant") },
+                title = { Text("AI Health Consultant", color = VitaMindDarkBrown) },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = VitaMindBackground,
+                    titleContentColor = VitaMindDarkBrown
                 )
             )
         },
         bottomBar = {
-            Surface(tonalElevation = 3.dp) {
+            Surface(
+                tonalElevation = 3.dp,
+                color = VitaMindBackground
+            ) {
                 Row(
                     modifier = Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
                         .fillMaxWidth()
                         .imePadding(),
                     verticalAlignment = Alignment.CenterVertically
@@ -55,9 +61,15 @@ fun ChatScreen(viewModel: ChatViewModel) {
                         value = inputText,
                         onValueChange = { inputText = it },
                         modifier = Modifier.weight(1f),
-                        placeholder = { Text("Ask about health or exercise...") },
+                        placeholder = { Text("Ask anything...", color = VitaMindBrown.copy(alpha = 0.6f)) },
                         maxLines = 4,
-                        shape = RoundedCornerShape(24.dp)
+                        shape = RoundedCornerShape(24.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = VitaMindBrown,
+                            unfocusedBorderColor = VitaMindBrown.copy(alpha = 0.3f),
+                            focusedContainerColor = Color.White,
+                            unfocusedContainerColor = Color.White
+                        )
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     IconButton(
@@ -69,13 +81,15 @@ fun ChatScreen(viewModel: ChatViewModel) {
                         },
                         enabled = inputText.isNotBlank() && !uiState.isLoading,
                         colors = IconButtonDefaults.filledIconButtonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
+                            containerColor = VitaMindCoral,
+                            contentColor = VitaMindDarkBrown,
+                            disabledContainerColor = VitaMindCoral.copy(alpha = 0.5f)
                         )
                     ) {
                         if (uiState.isLoading) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(24.dp),
-                                color = MaterialTheme.colorScheme.onPrimary,
+                                color = VitaMindDarkBrown,
                                 strokeWidth = 2.dp
                             )
                         } else {
@@ -84,7 +98,8 @@ fun ChatScreen(viewModel: ChatViewModel) {
                     }
                 }
             }
-        }
+        },
+        containerColor = VitaMindBackground
     ) { padding ->
         LazyColumn(
             state = listState,
@@ -93,17 +108,24 @@ fun ChatScreen(viewModel: ChatViewModel) {
                 .padding(padding)
                 .padding(horizontal = 16.dp),
             contentPadding = PaddingValues(vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (uiState.messages.isEmpty()) {
                 item {
                     Box(modifier = Modifier.fillParentMaxSize(), contentAlignment = Alignment.Center) {
-                        Text(
-                            "Hi! I'm your SanoAI Consultant. Ask me anything about your health or activity logs.",
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(32.dp),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
+                        Card(
+                            shape = OrganicBlobShape(),
+                            colors = CardDefaults.cardColors(containerColor = VitaMindMint.copy(alpha = 0.5f)),
+                            modifier = Modifier.padding(24.dp)
+                        ) {
+                            Text(
+                                "Hi! I'm your SanoAI Consultant. Ask me anything about your health or activity logs.",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = VitaMindDarkBrown,
+                                modifier = Modifier.padding(32.dp),
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
                 }
             }
@@ -119,12 +141,11 @@ fun ChatScreen(viewModel: ChatViewModel) {
 fun ChatBubble(message: ChatMessage) {
     val isUser = message.role == "user"
     val alignment = if (isUser) Alignment.End else Alignment.Start
-    val containerColor = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer
-    val contentColor = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer
+    val containerColor = if (isUser) VitaMindSkyBlue else VitaMindMint
     val shape = if (isUser) {
         RoundedCornerShape(20.dp, 20.dp, 4.dp, 20.dp)
     } else {
-        RoundedCornerShape(20.dp, 20.dp, 20.dp, 4.dp)
+        OrganicBlobShape()
     }
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = alignment) {
@@ -132,12 +153,12 @@ fun ChatBubble(message: ChatMessage) {
             modifier = Modifier
                 .clip(shape)
                 .background(containerColor)
-                .padding(12.dp)
-                .widthIn(max = 300.dp)
+                .padding(16.dp)
+                .widthIn(max = 280.dp)
         ) {
             Text(
                 text = message.content.toString(),
-                color = contentColor,
+                color = VitaMindDarkBrown,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
