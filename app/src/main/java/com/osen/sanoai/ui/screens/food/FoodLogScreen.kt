@@ -1,5 +1,6 @@
 package com.osen.sanoai.ui.screens.food
 
+import android.Manifest
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.camera.core.CameraSelector
@@ -27,6 +28,9 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.osen.sanoai.data.api.AiProvider
 import com.osen.sanoai.data.local.entities.FoodLog
 import com.osen.sanoai.ui.components.OrganicBlobShape
@@ -36,7 +40,7 @@ import com.osen.sanoai.ui.viewmodel.HealthViewModel
 import kotlinx.coroutines.launch
 import java.nio.ByteBuffer
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun FoodLogScreen(viewModel: HealthViewModel, onBack: () -> Unit) {
     val context = LocalContext.current
@@ -57,6 +61,8 @@ fun FoodLogScreen(viewModel: HealthViewModel, onBack: () -> Unit) {
     var protein by remember { mutableStateOf("") }
     var carbs by remember { mutableStateOf("") }
     var fats by remember { mutableStateOf("") }
+
+    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
 
     Scaffold(
         topBar = {
@@ -85,30 +91,43 @@ fun FoodLogScreen(viewModel: HealthViewModel, onBack: () -> Unit) {
                     .background(VitaMindMint.copy(alpha = 0.5f))
             ) {
                 if (capturedBitmap == null) {
-                    AndroidView(
-                        factory = {
-                            PreviewView(it).apply {
-                                this.controller = controller
-                                controller.bindToLifecycle(lifecycleOwner)
-                            }
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    IconButton(
-                        onClick = {
-                            controller.takePicture(
-                                ContextCompat.getMainExecutor(context),
-                                object : ImageCapture.OnImageCapturedCallback() {
-                                    override fun onCaptureSuccess(image: ImageProxy) {
-                                        capturedBitmap = image.toBitmap()
-                                        image.close()
-                                    }
+                    if (cameraPermissionState.status.isGranted) {
+                        AndroidView(
+                            factory = {
+                                PreviewView(it).apply {
+                                    this.controller = controller
+                                    controller.bindToLifecycle(lifecycleOwner)
                                 }
-                            )
-                        },
-                        modifier = Modifier.align(Alignment.BottomCenter).padding(24.dp)
-                    ) {
-                        Icon(Icons.Default.CameraAlt, "Take Photo", tint = Color.White, modifier = Modifier.size(48.dp))
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        IconButton(
+                            onClick = {
+                                controller.takePicture(
+                                    ContextCompat.getMainExecutor(context),
+                                    object : ImageCapture.OnImageCapturedCallback() {
+                                        override fun onCaptureSuccess(image: ImageProxy) {
+                                            capturedBitmap = image.toBitmap()
+                                            image.close()
+                                        }
+                                    }
+                                )
+                            },
+                            modifier = Modifier.align(Alignment.BottomCenter).padding(24.dp)
+                        ) {
+                            Icon(Icons.Default.CameraAlt, "Take Photo", tint = Color.White, modifier = Modifier.size(48.dp))
+                        }
+                    } else {
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("Camera permission is required", color = VitaMindBrown)
+                            Button(onClick = { cameraPermissionState.launchPermissionRequest() }) {
+                                Text("Request Permission")
+                            }
+                        }
                     }
                 } else {
                     Image(
