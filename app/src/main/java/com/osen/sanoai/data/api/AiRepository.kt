@@ -23,7 +23,28 @@ class AiRepository(
 
     suspend fun analyzeFood(bitmap: Bitmap, provider: AiProvider): FoodAnalysisResponse? = withContext(Dispatchers.IO) {
         try {
-            val prompt = "Analyze this food image. Provide the name, estimated calories, protein, carbs, and fats in JSON format: { \"name\": \"...\", \"calories\": 0.0, \"protein\": 0.0, \"carbs\": 0.0, \"fats\": 0.0 }. Only return the JSON."
+            val prompt = """
+                Analyze this food image. Provide the following fields in JSON format:
+                {
+                  "name": "...",
+                  "calories": 0.0,
+                  "protein": 0.0,
+                  "carbs": 0.0,
+                  "fats": 0.0,
+                  "sugar": 0.0,
+                  "fiber": 0.0,
+                  "calcium": 0.0,
+                  "copper": 0.0,
+                  "iron": 0.0,
+                  "magnesium": 0.0,
+                  "manganese": 0.0,
+                  "phosphorus": 0.0,
+                  "potassium": 0.0,
+                  "sodium": 0.0,
+                  "zinc": 0.0
+                }
+                Only return the JSON.
+            """.trimIndent()
             val json = when (provider) {
                 AiProvider.GEMINI -> {
                     val apiKey = secureStorage.getApiKey(SecureStorage.KEY_GEMINI) ?: return@withContext null

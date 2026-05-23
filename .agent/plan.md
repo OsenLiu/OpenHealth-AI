@@ -1,30 +1,20 @@
 # Project Plan
 
-Redesign SanoAI's UI to match the 'VitaMind' reference image. 
-Requirements:
-- Soft, organic 'blob' shapes for dashboard cards.
-- Warm pastel palette (Beige, Mint, Sky Blue, Coral).
-- Speech-bubble style AI Health Assistant Advice card.
-- Stylized navigation icons.
-- Modern, calming, and high-energy aesthetic.
+SanoAI: An Android health app with AI insights. Now featuring expanded nutrition tracking (11+ fields) and a refined VitaMind design.
 
 ## Project Brief
 
-# SanoAI Project Brief (UI Redesign)
+# SanoAI Project Brief (Expanded Nutrition)
 
 ## Features
-1. **Context-Aware AI Health Chat**: Personalized advice based on activity and profile.
-2. **Intelligent Logging**: Photo-based nutrition and exercise estimation.
-3. **Multi-Model Support**: Gemini, OpenAI, BytePlus with secure key storage.
-4. **Organic Health Dashboard**: Soft shapes, pastel colors, and speech-bubble AI advice.
-5. **Secure Persistence**: Room DB + Google Drive backup.
+1. **Expanded AI Nutrition Tracking**: Log meals with detailed analysis including Calories, Macronutrients (Protein, Carbs, Fats, Sugar, Fiber), and Micronutrients (Calcium, Copper, Iron, Magnesium, Manganese, Phosphorus, Potassium, Sodium, Zinc).
+2. **Context-Aware AI Health Chat**: Personalized advice based on activity and full nutritional profile.
+3. **VitaMind UI**: Organic shapes, warm pastel palette, and structured nutrition grid.
+4. **Multi-Model AI Configuration**: Support for Gemini, OpenAI, and BytePlus.
+5. **Secure Persistence & Cloud Backup**: Room DB + Google Drive backup.
 
-## UI Design Reference
-![UI Style Reference](/Users/osenliu/project/Project-OpenHealth-AI/input_images/image_0.png)
-
-## High-Level Technical Stack
-- Kotlin, Jetpack Compose, Material 3.
-- Navigation 3, Room, CameraX, Google Drive API.
+## Tech Stack
+- Kotlin, Compose, Navigation 3, Room, CameraX, Gemini SDK.
 
 ## Implementation Steps
 
@@ -108,7 +98,7 @@ Requirements:
 
 ### Task_9_DesignSystemRedesign: Implement the 'VitaMind' design system including the warm pastel palette, organic 'blob' shapes, and stylized icons.
 - **Status:** COMPLETED
-- **Updates:** Implemented the 'VitaMind' design system:
+- **Updates:** Implemented the 'VitaMind' design system: updated theme with pastel colors, created BlobShape and SpeechBubble components, and integrated stylized icons. Build pass.
 - **Acceptance Criteria:**
   - Material 3 theme updated with warm pastel palette (Beige, Mint, Sky Blue, Coral).
   - Custom organic 'blob' shapes and speech-bubble components implemented.
@@ -117,17 +107,30 @@ Requirements:
 
 ### Task_10_ScreenRefactorVerification: Apply the new design language to all app screens and perform final stability verification.
 - **Status:** COMPLETED
-- **Updates:** Full refactoring to 'VitaMind' design system completed:
-- Dashboard, Chat, and Logging screens updated with organic shapes and pastel palette.
-- AI Health Assistant Advice card implemented as a speech bubble.
-- Navigation bar updated with thematic icons.
-- Verified 18/18 unit tests pass and project builds successfully.
-- Code analysis confirms high fidelity to the /Users/osenliu/project/Project-OpenHealth-AI/input_images/image_0.png reference.
-- App is stable with full edge-to-edge support.
+- **Updates:** Full refactoring to 'VitaMind' design system completed: Dashboard, Chat, and Logging screens now use organic shapes and pastel colors. AI Health Assistant Advice card updated to speech-bubble style. Build pass.
 - **Acceptance Criteria:**
   - Dashboard, Chat, and Logging screens updated with soft organic shapes and pastel colors.
   - AI Health Assistant Advice card redesigned as a speech-bubble.
   - All existing tests pass, build pass, and app does not crash.
   - Final Run and Verify: App is stable, UI matches reference, and no critical issues found.
+
+### Task_11_ExpandedNutritionDataAi: Expand the data layer and AI service to support 11+ nutritional fields including sugar, fiber, and minerals.
+- **Status:** COMPLETED
+- **Updates:** Updated FoodLog entity and FoodAnalysisResponse DTO with 11 new fields (Sugar, Fiber, and 9 minerals). Incremented Room DB version and updated AiRepository prompts to request the full nutritional breakdown. Added unit tests to verify expanded JSON parsing. All 20 unit tests pass and build is successful.
+- **Acceptance Criteria:**
+  - FoodLog entity and Room DB updated with Sugar, Fiber, and 9 minerals (Calcium, Copper, Iron, Magnesium, Manganese, Phosphorus, Potassium, Sodium, Zinc).
+  - AiRepository prompts and parsing logic updated for the new 11+ fields.
+  - Unit tests updated to cover the expanded data model and AI parsing logic.
+  - Build pass.
+
+### Task_12_ExpandedNutritionUIAndVerify: Refactor the FoodLogScreen UI to display the expanded nutrition grid in VitaMind style and perform final verification.
+- **Status:** COMPLETED
+- **Updates:** Refactored FoodLogScreen UI to match the "VitaMind" expanded design, including a Macronutrients section and a Micronutrients grid (9 minerals). Integrated the UI with the updated HealthViewModel and FoodLog entity to support 15+ nutritional fields. Verified that AI analysis correctly populates the expanded form and data is persisted to Room DB. Final verification by critic agent confirmed UI fidelity to the reference image and application stability. All 20 unit tests pass.
+- **Acceptance Criteria:**
+  - FoodLogScreen UI updated with Macronutrients and Micronutrients grid.
+  - UI follows the VitaMind organic shape and pastel color aesthetic.
+  - The implemented UI must match the design provided in /Users/osenliu/project/Project-OpenHealth-AI/input_images/image_0.png.
+  - All tests pass, app does not crash.
+  - Final Run and Verify: Expanded nutrition features work correctly, and UI matches design expectations.
 - **Duration:** N/A
 

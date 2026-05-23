@@ -17,7 +17,7 @@ import com.osen.sanoai.data.local.entities.WeightRecord
         ExerciseLog::class,
         DailySuggestion::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
