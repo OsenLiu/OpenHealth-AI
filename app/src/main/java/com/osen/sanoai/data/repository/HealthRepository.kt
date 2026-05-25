@@ -39,6 +39,7 @@ class HealthRepository(
 
     // AI Operations
     suspend fun analyzeFood(bitmap: Bitmap, provider: AiProvider) = aiRepository.analyzeFood(bitmap, provider)
+    suspend fun analyzeFoodText(description: String, provider: AiProvider) = aiRepository.analyzeFoodText(description, provider)
     suspend fun analyzeExercise(description: String, provider: AiProvider) = aiRepository.analyzeExercise(description, provider)
     suspend fun generateHealthSuggestion(profile: String, logs: String, provider: AiProvider) = 
         aiRepository.generateHealthSuggestion(profile, logs, provider)

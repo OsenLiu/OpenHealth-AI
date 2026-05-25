@@ -82,6 +82,48 @@ class AiRepositoryTest {
     }
 
     @Test
+    fun `analyzeFoodText parses expanded JSON correctly`() = runTest {
+        val mockJsonResponse = """
+            {
+              "name": "Avocado Toast",
+              "calories": 350.0,
+              "protein": 12.0,
+              "carbs": 45.0,
+              "fats": 18.0,
+              "sugar": 4.0,
+              "fiber": 8.0,
+              "calcium": 52.0,
+              "copper": 0.2,
+              "iron": 2.1,
+              "magnesium": 42.0,
+              "manganese": 0.4,
+              "phosphorus": 95.0,
+              "potassium": 450.0,
+              "sodium": 320.0,
+              "zinc": 0.8
+            }
+        """.trimIndent()
+
+        `when`(secureStorage.getApiKey(any())).thenReturn("mock_key")
+        
+        val mockResponse = ChatCompletionResponse(
+            choices = listOf(
+                Choice(message = ChatMessageResponse(content = mockJsonResponse))
+            )
+        )
+
+        `when`(openAiApi.getChatCompletion(any(), any(), any())).thenReturn(mockResponse)
+
+        val result = aiRepository.analyzeFoodText("Avocado Toast", AiProvider.OPENAI)
+
+        assertNotNull(result)
+        assertEquals("Avocado Toast", result?.name)
+        assertEquals(350.0, result?.calories!!, 0.1)
+        assertEquals(4.0, result.sugar, 0.1)
+        assertEquals(0.8, result.zinc, 0.1)
+    }
+
+    @Test
     fun `analyzeExercise parses JSON correctly`() = runTest {
         val description = "Running 30 mins"
         val mockJsonResponse = """

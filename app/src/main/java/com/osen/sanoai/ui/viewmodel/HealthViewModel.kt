@@ -73,6 +73,10 @@ class HealthViewModel(
         return repository.analyzeFood(bitmap, provider)
     }
 
+    suspend fun analyzeFoodText(description: String, provider: AiProvider): FoodAnalysisResponse? {
+        return repository.analyzeFoodText(description, provider)
+    }
+
     suspend fun analyzeExercise(description: String, provider: AiProvider) = 
         repository.analyzeExercise(description, provider)
 

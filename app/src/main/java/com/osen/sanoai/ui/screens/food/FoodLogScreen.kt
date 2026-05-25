@@ -199,7 +199,51 @@ fun FoodLogScreen(viewModel: HealthViewModel, onBack: () -> Unit) {
             Spacer(modifier = Modifier.height(32.dp))
 
             // Food Name & Main Metric
-            VitaTextField(value = name, onValueChange = { name = it }, label = "Food Name")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                VitaTextField(
+                    value = name,
+                    onValueChange = { name = it },
+                    label = "Food Name",
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Button(
+                    onClick = {
+                        scope.launch {
+                            isAnalyzing = true
+                            val result = viewModel.analyzeFoodText(name, AiProvider.GEMINI)
+                            result?.let {
+                                calories = it.calories.toString()
+                                protein = it.protein.toString()
+                                carbs = it.carbs.toString()
+                                fats = it.fats.toString()
+                                sugar = it.sugar.toString()
+                                fiber = it.fiber.toString()
+                                calcium = it.calcium.toString()
+                                copper = it.copper.toString()
+                                iron = it.iron.toString()
+                                magnesium = it.magnesium.toString()
+                                manganese = it.manganese.toString()
+                                phosphorus = it.phosphorus.toString()
+                                potassium = it.potassium.toString()
+                                sodium = it.sodium.toString()
+                                zinc = it.zinc.toString()
+                            }
+                            isAnalyzing = false
+                        }
+                    },
+                    modifier = Modifier.height(56.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = VitaMindCoral),
+                    shape = RoundedCornerShape(16.dp),
+                    enabled = name.isNotBlank() && !isAnalyzing
+                ) {
+                    if (isAnalyzing) CircularProgressIndicator(modifier = Modifier.size(20.dp), color = VitaMindDarkBrown)
+                    else Text("Analyze ✨", color = VitaMindDarkBrown)
+                }
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Estimated:", style = MaterialTheme.typography.bodyMedium, color = VitaMindBrown)
