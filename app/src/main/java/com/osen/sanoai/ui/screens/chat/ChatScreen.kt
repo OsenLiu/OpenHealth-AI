@@ -145,7 +145,8 @@ fun ChatBubble(message: ChatMessage) {
     val shape = if (isUser) {
         RoundedCornerShape(20.dp, 20.dp, 4.dp, 20.dp)
     } else {
-        OrganicBlobShape()
+        // Use RoundedCornerShape for AI to prevent clipping of long text
+        RoundedCornerShape(24.dp)
     }
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = alignment) {
@@ -154,7 +155,7 @@ fun ChatBubble(message: ChatMessage) {
                 .clip(shape)
                 .background(containerColor)
                 .padding(16.dp)
-                .widthIn(max = 280.dp)
+                .widthIn(max = 300.dp)
         ) {
             Text(
                 text = message.content.toString(),
