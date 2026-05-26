@@ -122,7 +122,8 @@ fun SanoNavHost(viewModel: HealthViewModel) {
                     DashboardScreen(
                         viewModel = viewModel,
                         onNavigateToFood = { backStack.add(Destination.FoodLog) },
-                        onNavigateToExercise = { backStack.add(Destination.ExerciseLog) }
+                        onNavigateToExercise = { backStack.add(Destination.ExerciseLog) },
+                        onNavigateToChat = { backStack.add(Destination.Chat) }
                     )
                 }
                 Destination.FoodLog -> NavEntry(key) {

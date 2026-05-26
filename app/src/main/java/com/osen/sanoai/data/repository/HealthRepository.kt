@@ -29,11 +29,13 @@ class HealthRepository(
 
     // Food Logs
     fun getAllFoodLogs(): Flow<List<FoodLog>> = healthDao.getAllFoodLogs()
+    fun getFoodLogsInRange(startTime: Long, endTime: Long): Flow<List<FoodLog>> = healthDao.getFoodLogsInRange(startTime, endTime)
     suspend fun addFoodLog(log: FoodLog) = healthDao.insertFoodLog(log)
     suspend fun deleteFoodLog(log: FoodLog) = healthDao.deleteFoodLog(log)
 
     // Exercise Logs
     fun getAllExerciseLogs(): Flow<List<ExerciseLog>> = healthDao.getAllExerciseLogs()
+    fun getExerciseLogsInRange(startTime: Long, endTime: Long): Flow<List<ExerciseLog>> = healthDao.getExerciseLogsInRange(startTime, endTime)
     suspend fun addExerciseLog(log: ExerciseLog) = healthDao.insertExerciseLog(log)
     suspend fun deleteExerciseLog(log: ExerciseLog) = healthDao.deleteExerciseLog(log)
 

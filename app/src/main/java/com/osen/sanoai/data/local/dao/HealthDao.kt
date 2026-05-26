@@ -35,6 +35,9 @@ interface HealthDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertFoodLog(log: FoodLog)
 
+    @Query("SELECT * FROM food_logs WHERE timestamp >= :startTime AND timestamp <= :endTime ORDER BY timestamp ASC")
+    fun getFoodLogsInRange(startTime: Long, endTime: Long): Flow<List<FoodLog>>
+
     @Delete
     suspend fun deleteFoodLog(log: FoodLog)
 
@@ -44,6 +47,9 @@ interface HealthDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExerciseLog(log: ExerciseLog)
+
+    @Query("SELECT * FROM exercise_logs WHERE timestamp >= :startTime AND timestamp <= :endTime ORDER BY timestamp ASC")
+    fun getExerciseLogsInRange(startTime: Long, endTime: Long): Flow<List<ExerciseLog>>
 
     @Delete
     suspend fun deleteExerciseLog(log: ExerciseLog)

@@ -1,20 +1,21 @@
 # Project Plan
 
-SanoAI: An Android health app with AI insights. Now featuring expanded nutrition tracking (11+ fields) and a refined VitaMind design.
+SanoAI: An Android health app with AI insights. Now featuring a high-fidelity, date-driven Dashboard with doughnut charts, macro tracking, and detailed activity logs.
 
 ## Project Brief
 
-# SanoAI Project Brief (Expanded Nutrition)
+# SanoAI Project Brief (Deep Detail Dashboard)
 
 ## Features
-1. **Expanded AI Nutrition Tracking**: Log meals with detailed analysis including Calories, Macronutrients (Protein, Carbs, Fats, Sugar, Fiber), and Micronutrients (Calcium, Copper, Iron, Magnesium, Manganese, Phosphorus, Potassium, Sodium, Zinc).
-2. **Context-Aware AI Health Chat**: Personalized advice based on activity and full nutritional profile.
-3. **VitaMind UI**: Organic shapes, warm pastel palette, and structured nutrition grid.
-4. **Multi-Model AI Configuration**: Support for Gemini, OpenAI, and BytePlus.
-5. **Secure Persistence & Cloud Backup**: Room DB + Google Drive backup.
+1. **Calorie Doughnut Summary**: Visual summary of daily intake vs goal and exercise burn.
+2. **Macronutrient Tracking**: Real-time status of Carbs, Protein, and Fats.
+3. **Daily Activity Logs**: Detailed, time-stamped lists of food (with tags like "Omega-3 Rich") and exercise.
+4. **Interactive Calendar**: Switch between dates to view historical logs and AI advice.
+5. **Refined AI Insights**: Data-driven, personalized "Diet Prescriptions" based on daily activity.
+6. **VitaMind UI**: Organic shapes, warm palette, and high-fidelity detail.
 
 ## Tech Stack
-- Kotlin, Compose, Navigation 3, Room, CameraX, Gemini SDK.
+- Kotlin, Compose, Room, Navigation 3, CameraX, Gemini SDK.
 
 ## Implementation Steps
 
@@ -132,5 +133,27 @@ SanoAI: An Android health app with AI insights. Now featuring expanded nutrition
   - The implemented UI must match the design provided in /Users/osenliu/project/Project-OpenHealth-AI/input_images/image_0.png.
   - All tests pass, app does not crash.
   - Final Run and Verify: Expanded nutrition features work correctly, and UI matches design expectations.
+
+### Task_13_DashboardDataAndLogic: Update data layer and ViewModel to support date-driven dashboard queries and daily nutrition/activity summaries.
+- **Status:** COMPLETED
+- **Updates:** Updated Room DAO with date-range queries for food and exercise logs. Implemented reactive aggregation logic in HealthViewModel to calculate daily calorie and macronutrient summaries. Integrated a date switcher into the Dashboard UI and ensured AI suggestions are linked to the selected date. All 21 unit tests pass and project builds successfully.
+- **Acceptance Criteria:**
+  - DAO updated to fetch food and exercise logs by specific date range.
+  - ViewModel logic implemented for daily calorie and macronutrient (Carbs, Protein, Fat) aggregation.
+  - Calculation logic for doughnut chart data and macro percentages implemented.
+  - Date switcher (calendar) logic integrated into ViewModel.
+  - Build pass.
+
+### Task_14_DeepDetailDashboardUI: Implement the high-fidelity Deep Detail Dashboard UI with doughnut charts, detailed logs, and historical date support.
+- **Status:** COMPLETED
+- **Updates:** Implemented the high-fidelity Deep Detail Dashboard UI. Key components include a custom Doughnut Chart for calorie summary, a row of Macronutrient status cards (Carbs, Protein, Fats) with grams and percentages, and chronological lists for Food and Exercise logs featuring AI-generated nutritional tags. The AI Insight card was redesigned as a 'Smart Diet Prescription' matching the requested style. The dashboard supports historical date viewing via an integrated date switcher. Build is successful and all unit tests pass.
+- **Acceptance Criteria:**
+  - Calorie Summary card with doughnut chart and progress bars implemented (image_1 style).
+  - Macronutrient Status cards with percentages (Carbs, Protein, Fats).
+  - Detailed, time-stamped scrollable lists for Food and Exercise with AI-generated tags.
+  - AI Insight Card redesigned as 'Smart Diet Prescription' (image_2 style).
+  - The implemented UI must match the design provided in /Users/osenliu/project/Project-OpenHealth-AI/input_images/image_1.png and /Users/osenliu/project/Project-OpenHealth-AI/input_images/image_2.png.
+  - All tests pass, app does not crash.
+  - Final Run and Verify: Dashboard is fully functional and reflects historical data correctly.
 - **Duration:** N/A
 
