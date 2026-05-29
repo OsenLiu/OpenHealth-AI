@@ -48,6 +48,9 @@ interface HealthDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertExerciseLog(log: ExerciseLog)
 
+    @Update
+    suspend fun updateExerciseLog(log: ExerciseLog)
+
     @Query("SELECT * FROM exercise_logs WHERE timestamp >= :startTime AND timestamp <= :endTime ORDER BY timestamp ASC")
     fun getExerciseLogsInRange(startTime: Long, endTime: Long): Flow<List<ExerciseLog>>
 

@@ -37,6 +37,7 @@ class HealthRepository(
     fun getAllExerciseLogs(): Flow<List<ExerciseLog>> = healthDao.getAllExerciseLogs()
     fun getExerciseLogsInRange(startTime: Long, endTime: Long): Flow<List<ExerciseLog>> = healthDao.getExerciseLogsInRange(startTime, endTime)
     suspend fun addExerciseLog(log: ExerciseLog) = healthDao.insertExerciseLog(log)
+    suspend fun updateExerciseLog(log: ExerciseLog) = healthDao.updateExerciseLog(log)
     suspend fun deleteExerciseLog(log: ExerciseLog) = healthDao.deleteExerciseLog(log)
 
     // AI Operations

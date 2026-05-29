@@ -62,7 +62,7 @@ class HealthViewModel(
         dailyExerciseLogs
     ) { food, exercise ->
         val totalKcal = food.sumOf { it.calories }
-        val burnedKcal = exercise.sumOf { it.caloriesBurned }
+        val burnedKcal = exercise.filter { it.isCompleted }.sumOf { it.caloriesBurned }
         val protein = food.sumOf { it.protein }
         val carbs = food.sumOf { it.carbs }
         val fats = food.sumOf { it.fats }
@@ -149,6 +149,10 @@ class HealthViewModel(
 
     fun addExerciseLog(log: ExerciseLog) {
         viewModelScope.launch { repository.addExerciseLog(log) }
+    }
+
+    fun updateExerciseLog(log: ExerciseLog) {
+        viewModelScope.launch { repository.updateExerciseLog(log) }
     }
 
     fun saveApiKey(provider: String, key: String) {

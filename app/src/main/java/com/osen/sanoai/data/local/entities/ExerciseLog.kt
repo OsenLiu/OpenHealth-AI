@@ -9,5 +9,6 @@ data class ExerciseLog(
     val name: String,
     val caloriesBurned: Double,
     val durationMinutes: Int,
-    val timestamp: Long
+    val timestamp: Long,
+    val isCompleted: Boolean = false
 )

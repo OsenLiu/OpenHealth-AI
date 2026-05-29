@@ -1,6 +1,7 @@
 package com.osen.sanoai.ui.screens.dashboard
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -11,7 +12,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.automirrored.rounded.DirectionsRun
 import androidx.compose.material.icons.rounded.*
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,6 +23,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -176,20 +180,80 @@ fun DashboardScreen(
 
             // 5. Exercise Burn List
             item {
-                SectionHeader("運動消耗清單", "新增運動", onNavigateToExercise)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.AutoMirrored.Rounded.DirectionsRun, null, tint = Color(0xFF4CAF50), modifier = Modifier.size(20.dp))
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "當天運動計畫 (點擊勾選完成)",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = VitaMindBrown,
+                            maxLines = 1
+                        )
+                    }
+                    val completedCount = exerciseLogs.count { it.isCompleted }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Surface(
+                            color = Color.Black.copy(alpha = 0.05f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Text(
+                                "已完成 $completedCount/${exerciseLogs.size}",
+                                fontSize = 11.sp,
+                                color = VitaMindBrown.copy(alpha = 0.6f),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                maxLines = 1
+                            )
+                        }
+                        Spacer(Modifier.width(8.dp))
+                        IconButton(onClick = onNavigateToExercise, modifier = Modifier.size(24.dp)) {
+                            Icon(Icons.Default.Add, "新增運動", tint = Color(0xFF2E7D32), modifier = Modifier.size(20.dp))
+                        }
+                    }
+                }
             }
             items(exerciseLogs) { log ->
-                ExerciseLogItem(log, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+                ExerciseChecklistItem(
+                    log = log,
+                    onCheckedChange = { isChecked ->
+                        viewModel.updateExerciseLog(log.copy(isCompleted = isChecked))
+                    },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                )
             }
 
             item { Spacer(Modifier.height(24.dp)) }
 
-            // 6. AI Prescription Card
+            // 6. AI Diet Suggestion Section
             item {
-                AiPrescriptionCard(
+                AiSuggestedDietSection(
                     suggestion = suggestion,
+                    onAddFood = { name, calories, protein, carbs, fats ->
+                        viewModel.addFoodLog(
+                            FoodLog(
+                                name = name,
+                                calories = calories,
+                                protein = protein,
+                                carbs = carbs,
+                                fats = fats,
+                                timestamp = selectedDate // Or current time if preferred
+                            )
+                        )
+                    },
                     onRefresh = { viewModel.fetchDailySuggestion(AiProvider.GEMINI, selectedDate, forceRefresh = true) },
-                    onChat = onNavigateToChat,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
@@ -411,6 +475,21 @@ fun SectionHeader(title: String, action: String, onClick: () -> Unit) {
 }
 
 @Composable
+fun DietTag(label: String, bgColor: Color, textColor: Color) {
+    Surface(
+        color = bgColor,
+        shape = RoundedCornerShape(4.dp)
+    ) {
+        Text(
+            label,
+            color = textColor,
+            fontSize = 10.sp,
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+        )
+    }
+}
+
+@Composable
 fun FoodLogItem(log: FoodLog, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -428,8 +507,8 @@ fun FoodLogItem(log: FoodLog, modifier: Modifier = Modifier) {
                 Text(log.name, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = VitaMindDarkBrown)
                 Spacer(Modifier.height(8.dp))
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Tag("High Protein", Color(0xFFE3F2FD), Color(0xFF1976D2))
-                    if (log.fats < 5) Tag("Low Fat", Color(0xFFE8F5E9), Color(0xFF388E3C))
+                    DietTag("High Protein", Color(0xFFE3F2FD), Color(0xFF1976D2))
+                    if (log.fats < 5) DietTag("Low Fat", Color(0xFFE8F5E9), Color(0xFF388E3C))
                 }
             }
             Text("${log.calories.toInt()} kcal", fontSize = 16.sp, fontWeight = FontWeight.Bold, color = VitaMindBrown)
@@ -470,56 +549,172 @@ fun ExerciseLogItem(log: ExerciseLog, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun Tag(label: String, bgColor: Color, textColor: Color) {
-    Surface(
-        color = bgColor,
-        shape = RoundedCornerShape(4.dp)
+fun ExerciseChecklistItem(
+    log: ExerciseLog,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Text(
-            label,
-            color = textColor,
-            fontSize = 10.sp,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-        )
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = log.isCompleted,
+                onCheckedChange = onCheckedChange,
+                colors = CheckboxDefaults.colors(checkedColor = Color(0xFF4CAF50))
+            )
+            Spacer(Modifier.width(8.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    "${log.name} (${log.durationMinutes}分鐘)",
+                    fontWeight = FontWeight.Bold,
+                    color = if (log.isCompleted) Color.Gray else VitaMindDarkBrown,
+                    fontSize = 15.sp,
+                    textDecoration = if (log.isCompleted) TextDecoration.LineThrough else TextDecoration.None
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Rounded.Timer, null, tint = Color.LightGray, modifier = Modifier.size(14.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(
+                        "預估燃燒 ${log.caloriesBurned.toInt()} kcal",
+                        fontSize = 12.sp,
+                        color = Color.LightGray
+                    )
+                }
+            }
+            Icon(
+                if (log.name.contains("跑")) Icons.AutoMirrored.Rounded.DirectionsRun else Icons.Rounded.Favorite,
+                null,
+                tint = Color.Black.copy(alpha = 0.05f),
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }
 
 @Composable
-fun AiPrescriptionCard(suggestion: String, onRefresh: () -> Unit, onChat: () -> Unit, modifier: Modifier = Modifier) {
+fun AiSuggestedDietSection(
+    suggestion: String,
+    onAddFood: (String, Double, Double, Double, Double) -> Unit,
+    onRefresh: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9).copy(alpha = 0.7f)),
         shape = RoundedCornerShape(24.dp)
     ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Surface(color = Color(0xFF66BB6A), shape = RoundedCornerShape(12.dp), modifier = Modifier.size(40.dp)) {
-                         // Placeholder for logo
-                    }
-                    Spacer(Modifier.width(12.dp))
-                    Text("Gemini 智能膳食處方", fontWeight = FontWeight.Bold, color = VitaMindDarkBrown)
-                }
-                Surface(color = Color(0xFFC8E6C9), shape = RoundedCornerShape(4.dp)) {
-                    Text("動態深度分析", fontSize = 10.sp, color = Color(0xFF2E7D32), modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
-                }
-            }
-            Spacer(Modifier.height(16.dp))
-            Text(suggestion, style = MaterialTheme.typography.bodyMedium, color = VitaMindDarkBrown)
-            Spacer(Modifier.height(20.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                Text("基於本機 API 連接安全運行", fontSize = 11.sp, color = VitaMindBrown.copy(alpha = 0.6f))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    TextButton(onClick = onRefresh, contentPadding = PaddingValues(horizontal = 8.dp)) {
-                        Text("刷新", color = Color(0xFF2E7D32), fontSize = 13.sp)
-                    }
-                    TextButton(onClick = onChat, contentPadding = PaddingValues(0.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("對話建議", color = Color(0xFF2E7D32), fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, modifier = Modifier.size(16.dp), tint = Color(0xFF2E7D32))
+                    Surface(
+                        color = Color(0xFF4CAF50),
+                        shape = CircleShape,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.Rounded.Restaurant, null, tint = Color.White, modifier = Modifier.size(18.dp))
                         }
                     }
+                    Spacer(Modifier.width(12.dp))
+                    Text("AI 智慧建議飲食菜單", fontWeight = FontWeight.Bold, color = Color(0xFF1B5E20), fontSize = 16.sp)
                 }
+                Surface(
+                    color = Color.White.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(12.dp)
+                ) {
+                    TextButton(onClick = onRefresh, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp), modifier = Modifier.height(24.dp)) {
+                        Text(
+                            "刷新建議",
+                            fontSize = 10.sp,
+                            color = Color(0xFF2E7D32),
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+            
+            Spacer(Modifier.height(16.dp))
+
+            // In a real app, we would parse the 'suggestion' string or have a structured list.
+            // For now, we'll show dummy items based on the UI design provided.
+            
+            val suggestions = listOf(
+                DietSuggestion("早餐 推薦", "酪梨堅果奇亞籽燕麥粥", 410.0, "高纖優脂", Icons.Rounded.BakeryDining, 12.0, 45.0, 15.0),
+                DietSuggestion("午餐 推薦", "嫩煎鮭魚配糙米飯佐西藍花", 620.0, "高蛋白 Omega-3", Icons.Rounded.SetMeal, 35.0, 50.0, 22.0),
+                DietSuggestion("晚餐 推薦", "蒜香舒肥雞胸肉配五穀米", 350.0, "低脂高蛋白", Icons.Rounded.Fastfood, 30.0, 40.0, 8.0)
+            )
+
+            suggestions.forEach { item ->
+                DietRecommendationItem(
+                    mealType = item.type,
+                    menuName = item.name,
+                    desc = "${item.kcal.toInt()} kcal • ${item.tags}",
+                    icon = item.icon,
+                    onAdd = {
+                        onAddFood(item.name, item.kcal, item.protein, item.carbs, item.fats)
+                    }
+                )
+                Spacer(Modifier.height(12.dp))
+            }
+        }
+    }
+}
+
+data class DietSuggestion(
+    val type: String,
+    val name: String,
+    val kcal: Double,
+    val tags: String,
+    val icon: ImageVector,
+    val protein: Double,
+    val carbs: Double,
+    val fats: Double
+)
+
+@Composable
+fun DietRecommendationItem(mealType: String, menuName: String, desc: String, icon: ImageVector, onAdd: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Surface(
+                color = Color(0xFFE8F5E9),
+                shape = RoundedCornerShape(12.dp),
+                modifier = Modifier.size(48.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(icon, null, tint = Color(0xFF4CAF50), modifier = Modifier.size(24.dp))
+                }
+            }
+            Spacer(Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(mealType, fontSize = 11.sp, color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
+                Text(menuName, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF212121))
+                Text(desc, fontSize = 11.sp, color = Color.LightGray)
+            }
+            IconButton(
+                onClick = onAdd,
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(Color(0xFF4CAF50), CircleShape)
+            ) {
+                Icon(Icons.Rounded.Add, null, tint = Color.White, modifier = Modifier.size(20.dp))
             }
         }
     }
