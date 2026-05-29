@@ -75,7 +75,7 @@ fun ChatScreen(viewModel: ChatViewModel) {
                     IconButton(
                         onClick = {
                             if (inputText.isNotBlank()) {
-                                viewModel.sendMessage(inputText, AiProvider.GEMINI)
+                                viewModel.sendMessage(inputText, viewModel.getSelectedAiProvider())
                                 inputText = ""
                             }
                         },

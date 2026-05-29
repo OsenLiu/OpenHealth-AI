@@ -21,6 +21,8 @@ class ChatViewModel(private val repository: HealthRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState: StateFlow<ChatUiState> = _uiState.asStateFlow()
 
+    fun getSelectedAiProvider() = repository.getSelectedAiProvider()
+
     fun sendMessage(message: String, provider: AiProvider) {
         if (message.isBlank()) return
 
@@ -50,7 +52,8 @@ class ChatViewModel(private val repository: HealthRepository) : ViewModel() {
                     profile = profileString,
                     logs = logsString,
                     history = history,
-                    provider = provider
+                    provider = provider,
+                    modelName = repository.getModelName(provider)
                 )
 
                 val updatedMessages = _uiState.value.messages.toMutableList()

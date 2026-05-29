@@ -33,7 +33,7 @@ class AiRepository(
         return suggestionAdapter.toJson(suggestion)
     }
 
-    suspend fun analyzeFood(bitmap: Bitmap, provider: AiProvider): FoodAnalysisResponse? = withContext(Dispatchers.IO) {
+    suspend fun analyzeFood(bitmap: Bitmap, provider: AiProvider, modelName: String): FoodAnalysisResponse? = withContext(Dispatchers.IO) {
         try {
             val prompt = """
                 Analyze this food image. Provide the following fields in JSON format:
@@ -60,7 +60,7 @@ class AiRepository(
             val json = when (provider) {
                 AiProvider.GEMINI -> {
                     val apiKey = secureStorage.getApiKey(SecureStorage.KEY_GEMINI) ?: return@withContext null
-                    val model = GenerativeModel(modelName = "gemini-3.5-flash", apiKey = apiKey)
+                    val model = GenerativeModel(modelName = modelName, apiKey = apiKey)
                     val response = model.generateContent(content {
                         image(bitmap)
                         text(prompt)
@@ -71,7 +71,6 @@ class AiRepository(
                     val key = if (provider == AiProvider.OPENAI) SecureStorage.KEY_OPENAI else SecureStorage.KEY_BYTEPLUS
                     val apiKey = secureStorage.getApiKey(key) ?: return@withContext null
                     val baseUrl = if (provider == AiProvider.OPENAI) "https://api.openai.com/v1/chat/completions" else "https://ark.ap-southeast.bytepluses.com/api/v3/chat/completions"
-                    val modelName = if (provider == AiProvider.OPENAI) "gpt-5.4-mini" else "ep-20250212104526-v2v5w"
 
                     val base64Image = bitmapToBase64(bitmap)
                     val request = ChatCompletionRequest(
@@ -97,7 +96,7 @@ class AiRepository(
         }
     }
 
-    suspend fun analyzeFoodText(description: String, provider: AiProvider): FoodAnalysisResponse? = withContext(Dispatchers.IO) {
+    suspend fun analyzeFoodText(description: String, provider: AiProvider, modelName: String): FoodAnalysisResponse? = withContext(Dispatchers.IO) {
         try {
             val prompt = """
                 Analyze this food description: '$description'. Provide the following fields in JSON format:
@@ -124,7 +123,7 @@ class AiRepository(
             val json = when (provider) {
                 AiProvider.GEMINI -> {
                     val apiKey = secureStorage.getApiKey(SecureStorage.KEY_GEMINI) ?: return@withContext null
-                    val model = GenerativeModel(modelName = "gemini-3.5-flash", apiKey = apiKey)
+                    val model = GenerativeModel(modelName = modelName, apiKey = apiKey)
                     val response = model.generateContent(prompt)
                     response.text
                 }
@@ -132,7 +131,6 @@ class AiRepository(
                     val key = if (provider == AiProvider.OPENAI) SecureStorage.KEY_OPENAI else SecureStorage.KEY_BYTEPLUS
                     val apiKey = secureStorage.getApiKey(key) ?: return@withContext null
                     val baseUrl = if (provider == AiProvider.OPENAI) "https://api.openai.com/v1/chat/completions" else "https://ark.ap-southeast.bytepluses.com/api/v3/chat/completions"
-                    val modelName = if (provider == AiProvider.OPENAI) "gpt-5.4-mini" else "ep-20250212104526-v2v5w"
 
                     val request = ChatCompletionRequest(
                         model = modelName,
@@ -149,13 +147,13 @@ class AiRepository(
         }
     }
 
-    suspend fun analyzeExercise(description: String, provider: AiProvider): ExerciseAnalysisResponse? = withContext(Dispatchers.IO) {
+    suspend fun analyzeExercise(description: String, provider: AiProvider, modelName: String): ExerciseAnalysisResponse? = withContext(Dispatchers.IO) {
         try {
             val prompt = "Estimate the calories burned for this exercise: '$description'. Provide the name, estimated calories burned, and duration in minutes in JSON format: { \"name\": \"...\", \"caloriesBurned\": 0.0, \"durationMinutes\": 0 }. Only return the JSON."
             val json = when (provider) {
                 AiProvider.GEMINI -> {
                     val apiKey = secureStorage.getApiKey(SecureStorage.KEY_GEMINI) ?: return@withContext null
-                    val model = GenerativeModel(modelName = "gemini-3.5-flash", apiKey = apiKey)
+                    val model = GenerativeModel(modelName = modelName, apiKey = apiKey)
                     val response = model.generateContent(prompt)
                     response.text
                 }
@@ -163,7 +161,6 @@ class AiRepository(
                     val key = if (provider == AiProvider.OPENAI) SecureStorage.KEY_OPENAI else SecureStorage.KEY_BYTEPLUS
                     val apiKey = secureStorage.getApiKey(key) ?: return@withContext null
                     val baseUrl = if (provider == AiProvider.OPENAI) "https://api.openai.com/v1/chat/completions" else "https://ark.ap-southeast.bytepluses.com/api/v3/chat/completions"
-                    val modelName = if (provider == AiProvider.OPENAI) "gpt-5.4-mini" else "ep-20250212104526-v2v5w"
 
                     val request = ChatCompletionRequest(
                         model = modelName,
@@ -180,7 +177,7 @@ class AiRepository(
         }
     }
 
-    suspend fun generateHealthSuggestion(profile: String, logs: String, provider: AiProvider): HealthSuggestionResponse? = withContext(Dispatchers.IO) {
+    suspend fun generateHealthSuggestion(profile: String, logs: String, provider: AiProvider, modelName: String): HealthSuggestionResponse? = withContext(Dispatchers.IO) {
         try {
             val prompt = """
                 Based on the user's profile: $profile and recent logs: $logs, provide a daily health suggestion. 
@@ -202,7 +199,7 @@ class AiRepository(
             val json = when (provider) {
                 AiProvider.GEMINI -> {
                     val apiKey = secureStorage.getApiKey(SecureStorage.KEY_GEMINI) ?: return@withContext null
-                    val model = GenerativeModel(modelName = "gemini-3.5-flash", apiKey = apiKey)
+                    val model = GenerativeModel(modelName = modelName, apiKey = apiKey)
                     val response = model.generateContent(prompt)
                     response.text
                 }
@@ -210,7 +207,6 @@ class AiRepository(
                     val key = if (provider == AiProvider.OPENAI) SecureStorage.KEY_OPENAI else SecureStorage.KEY_BYTEPLUS
                     val apiKey = secureStorage.getApiKey(key) ?: return@withContext null
                     val baseUrl = if (provider == AiProvider.OPENAI) "https://api.openai.com/v1/chat/completions" else "https://ark.ap-southeast.bytepluses.com/api/v3/chat/completions"
-                    val modelName = if (provider == AiProvider.OPENAI) "gpt-5.4-mini" else "ep-20250212104526-v2v5w"
 
                     val request = ChatCompletionRequest(
                         model = modelName,
@@ -232,7 +228,8 @@ class AiRepository(
         profile: String,
         logs: String,
         history: List<ChatMessage>,
-        provider: AiProvider
+        provider: AiProvider,
+        modelName: String
     ): String? = withContext(Dispatchers.IO) {
         try {
             val systemPrompt = "You are a personalized AI Health Consultant for SanoAI. " +
@@ -242,7 +239,7 @@ class AiRepository(
             when (provider) {
                 AiProvider.GEMINI -> {
                     val apiKey = secureStorage.getApiKey(SecureStorage.KEY_GEMINI) ?: return@withContext null
-                    val model = GenerativeModel(modelName = "gemini-3.5-flash", apiKey = apiKey)
+                    val model = GenerativeModel(modelName = modelName, apiKey = apiKey)
                     // Simplified: Prepend system prompt to the user message for Gemini
                     val fullPrompt = "$systemPrompt\n\nUser: $message"
                     val response = model.generateContent(fullPrompt)
@@ -252,7 +249,6 @@ class AiRepository(
                     val key = if (provider == AiProvider.OPENAI) SecureStorage.KEY_OPENAI else SecureStorage.KEY_BYTEPLUS
                     val apiKey = secureStorage.getApiKey(key) ?: return@withContext null
                     val baseUrl = if (provider == AiProvider.OPENAI) "https://api.openai.com/v1/chat/completions" else "https://ark.ap-southeast.bytepluses.com/api/v3/chat/completions"
-                    val modelName = if (provider == AiProvider.OPENAI) "gpt-5.4-mini" else "ep-20250212104526-v2v5w"
 
                     val messages = mutableListOf<ChatMessage>()
                     messages.add(ChatMessage(role = "system", content = systemPrompt))

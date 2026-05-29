@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.osen.sanoai.data.api.AiProvider
 import com.osen.sanoai.data.api.model.ChatMessage
+import com.osen.sanoai.data.api.model.ExerciseAnalysisResponse
 import com.osen.sanoai.data.api.model.FoodAnalysisResponse
 import com.osen.sanoai.data.api.model.HealthSuggestionResponse
 import com.osen.sanoai.data.backup.GoogleDriveService
@@ -37,6 +38,9 @@ class HealthViewModel(
 
     private val _suggestionState = MutableStateFlow<HealthSuggestionResponse?>(null)
     val suggestionState: StateFlow<HealthSuggestionResponse?> = _suggestionState.asStateFlow()
+
+    private val _selectedAiProvider = MutableStateFlow(repository.getSelectedAiProvider())
+    val selectedAiProvider: StateFlow<AiProvider> = _selectedAiProvider.asStateFlow()
 
     private val _selectedDate = MutableStateFlow(System.currentTimeMillis())
     val selectedDate: StateFlow<Long> = _selectedDate.asStateFlow()
@@ -160,18 +164,30 @@ class HealthViewModel(
         repository.saveApiKey(provider, key)
     }
 
+    fun setSelectedAiProvider(provider: AiProvider) {
+        _selectedAiProvider.value = provider
+        repository.saveSelectedAiProvider(provider)
+    }
+
+    fun getSelectedModel(provider: AiProvider) = repository.getModelName(provider)
+    fun setSelectedModel(provider: AiProvider, modelName: String) = repository.saveModelName(provider, modelName)
+
     fun getApiKey(provider: String) = repository.getApiKey(provider)
 
     suspend fun analyzeFood(bitmap: Bitmap, provider: AiProvider): FoodAnalysisResponse? {
-        return repository.analyzeFood(bitmap, provider)
+        val modelName = repository.getModelName(provider)
+        return repository.analyzeFood(bitmap, provider, modelName)
     }
 
     suspend fun analyzeFoodText(description: String, provider: AiProvider): FoodAnalysisResponse? {
-        return repository.analyzeFoodText(description, provider)
+        val modelName = repository.getModelName(provider)
+        return repository.analyzeFoodText(description, provider, modelName)
     }
 
-    suspend fun analyzeExercise(description: String, provider: AiProvider) = 
-        repository.analyzeExercise(description, provider)
+    suspend fun analyzeExercise(description: String, provider: AiProvider) : ExerciseAnalysisResponse? {
+        val modelName = repository.getModelName(provider)
+        return repository.analyzeExercise(description, provider, modelName)
+    }
 
     fun fetchDailySuggestion(provider: AiProvider, date: Long, forceRefresh: Boolean = false) {
         viewModelScope.launch {
@@ -196,7 +212,8 @@ class HealthViewModel(
             val exercise = repository.getExerciseLogsInRange(range.first, range.second).first().take(10)
             
             val logs = "Food: $food, Exercise: $exercise"
-            val suggestionResponse = repository.generateHealthSuggestion(profile, logs, provider)
+            val modelName = repository.getModelName(provider)
+            val suggestionResponse = repository.generateHealthSuggestion(profile, logs, provider, modelName)
             
             if (suggestionResponse != null) {
                 _suggestionState.value = suggestionResponse

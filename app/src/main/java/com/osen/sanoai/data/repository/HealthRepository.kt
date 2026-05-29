@@ -42,14 +42,14 @@ class HealthRepository(
     suspend fun deleteExerciseLog(log: ExerciseLog) = healthDao.deleteExerciseLog(log)
 
     // AI Operations
-    suspend fun analyzeFood(bitmap: Bitmap, provider: AiProvider) = aiRepository.analyzeFood(bitmap, provider)
-    suspend fun analyzeFoodText(description: String, provider: AiProvider) = aiRepository.analyzeFoodText(description, provider)
-    suspend fun analyzeExercise(description: String, provider: AiProvider) = aiRepository.analyzeExercise(description, provider)
-    suspend fun generateHealthSuggestion(profile: String, logs: String, provider: AiProvider) = 
-        aiRepository.generateHealthSuggestion(profile, logs, provider)
+    suspend fun analyzeFood(bitmap: Bitmap, provider: AiProvider, modelName: String) = aiRepository.analyzeFood(bitmap, provider, modelName)
+    suspend fun analyzeFoodText(description: String, provider: AiProvider, modelName: String) = aiRepository.analyzeFoodText(description, provider, modelName)
+    suspend fun analyzeExercise(description: String, provider: AiProvider, modelName: String) = aiRepository.analyzeExercise(description, provider, modelName)
+    suspend fun generateHealthSuggestion(profile: String, logs: String, provider: AiProvider, modelName: String) = 
+        aiRepository.generateHealthSuggestion(profile, logs, provider, modelName)
 
-    suspend fun chatWithConsultant(message: String, profile: String, logs: String, history: List<ChatMessage>, provider: AiProvider) =
-        aiRepository.chatWithConsultant(message, profile, logs, history, provider)
+    suspend fun chatWithConsultant(message: String, profile: String, logs: String, history: List<ChatMessage>, provider: AiProvider, modelName: String) =
+        aiRepository.chatWithConsultant(message, profile, logs, history, provider, modelName)
 
     fun parseSuggestionJson(json: String) = aiRepository.parseSuggestionJson(json)
     fun toJson(suggestion: HealthSuggestionResponse) = aiRepository.suggestionToJson(suggestion)
@@ -57,6 +57,23 @@ class HealthRepository(
     // API Keys
     fun saveApiKey(provider: String, apiKey: String) = secureStorage.saveApiKey(provider, apiKey)
     fun getApiKey(provider: String): String? = secureStorage.getApiKey(provider)
+
+    fun saveSelectedAiProvider(provider: AiProvider) = secureStorage.saveSelectedProvider(provider.name)
+    fun getSelectedAiProvider(): AiProvider {
+        val name = secureStorage.getSelectedProvider()
+        return if (name != null) AiProvider.valueOf(name) else AiProvider.GEMINI
+    }
+
+    fun saveModelName(provider: AiProvider, modelName: String) =
+        secureStorage.saveModelName(provider.name, modelName)
+
+    fun getModelName(provider: AiProvider): String {
+        return secureStorage.getModelName(provider.name) ?: when (provider) {
+            AiProvider.GEMINI -> "gemini-3.5-flash"
+            AiProvider.OPENAI -> "gpt-4o-mini"
+            AiProvider.BYTEPLUS -> "ep-20250212104526-v2v5w"
+        }
+    }
 
     // Cached Suggestions
     suspend fun getCachedSuggestion(date: String): DailySuggestion? = healthDao.getSuggestionByDate(date)

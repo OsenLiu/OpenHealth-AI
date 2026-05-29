@@ -51,6 +51,7 @@ fun DashboardScreen(
     val dailySummary by viewModel.dailySummary.collectAsState()
     val foodLogs by viewModel.dailyFoodLogs.collectAsState()
     val exerciseLogs by viewModel.dailyExerciseLogs.collectAsState()
+    val selectedAiProvider by viewModel.selectedAiProvider.collectAsState()
 
     var showDatePicker by remember { mutableStateOf(false) }
 
@@ -58,8 +59,8 @@ fun DashboardScreen(
         SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
     }
 
-    LaunchedEffect(selectedDate) {
-        viewModel.fetchDailySuggestion(AiProvider.GEMINI, selectedDate)
+    LaunchedEffect(selectedDate, selectedAiProvider) {
+        viewModel.fetchDailySuggestion(selectedAiProvider, selectedDate)
     }
 
     if (showDatePicker) {
@@ -273,7 +274,7 @@ fun DashboardScreen(
                             )
                         )
                     },
-                    onRefresh = { viewModel.fetchDailySuggestion(AiProvider.GEMINI, selectedDate, forceRefresh = true) },
+                    onRefresh = { viewModel.fetchDailySuggestion(selectedAiProvider, selectedDate, forceRefresh = true) },
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
