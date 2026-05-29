@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.osen.sanoai.data.api.AiProvider
+import com.osen.sanoai.data.api.model.HealthSuggestionResponse
 import com.osen.sanoai.data.local.entities.ExerciseLog
 import com.osen.sanoai.data.local.entities.FoodLog
 import com.osen.sanoai.ui.components.OrganicBlobShape
@@ -226,7 +227,7 @@ fun DashboardScreen(
                 }
             }
             items(exerciseLogs) { log ->
-                ExerciseChecklistItem(
+                ExerciseChecklistLogItem(
                     log = log,
                     onCheckedChange = { isChecked ->
                         viewModel.updateExerciseLog(log.copy(isCompleted = isChecked))
@@ -235,12 +236,31 @@ fun DashboardScreen(
                 )
             }
 
+            // AI Suggested Exercises
+            item {
+                AiSuggestedExerciseSection(
+                    suggestionResponse = suggestion,
+                    onAddExercise = { name, calories, duration ->
+                        viewModel.addExerciseLog(
+                            ExerciseLog(
+                                name = name,
+                                caloriesBurned = calories,
+                                durationMinutes = duration,
+                                timestamp = selectedDate,
+                                isCompleted = false
+                            )
+                        )
+                    },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+            }
+
             item { Spacer(Modifier.height(24.dp)) }
 
             // 6. AI Diet Suggestion Section
             item {
                 AiSuggestedDietSection(
-                    suggestion = suggestion,
+                    suggestionResponse = suggestion,
                     onAddFood = { name, calories, protein, carbs, fats ->
                         viewModel.addFoodLog(
                             FoodLog(
@@ -549,7 +569,7 @@ fun ExerciseLogItem(log: ExerciseLog, modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun ExerciseChecklistItem(
+fun ExerciseChecklistLogItem(
     log: ExerciseLog,
     onCheckedChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
@@ -600,7 +620,7 @@ fun ExerciseChecklistItem(
 
 @Composable
 fun AiSuggestedDietSection(
-    suggestion: String,
+    suggestionResponse: HealthSuggestionResponse?,
     onAddFood: (String, Double, Double, Double, Double) -> Unit,
     onRefresh: () -> Unit,
     modifier: Modifier = Modifier
@@ -646,41 +666,92 @@ fun AiSuggestedDietSection(
             
             Spacer(Modifier.height(16.dp))
 
-            // In a real app, we would parse the 'suggestion' string or have a structured list.
-            // For now, we'll show dummy items based on the UI design provided.
-            
-            val suggestions = listOf(
-                DietSuggestion("早餐 推薦", "酪梨堅果奇亞籽燕麥粥", 410.0, "高纖優脂", Icons.Rounded.BakeryDining, 12.0, 45.0, 15.0),
-                DietSuggestion("午餐 推薦", "嫩煎鮭魚配糙米飯佐西藍花", 620.0, "高蛋白 Omega-3", Icons.Rounded.SetMeal, 35.0, 50.0, 22.0),
-                DietSuggestion("晚餐 推薦", "蒜香舒肥雞胸肉配五穀米", 350.0, "低脂高蛋白", Icons.Rounded.Fastfood, 30.0, 40.0, 8.0)
-            )
-
-            suggestions.forEach { item ->
-                DietRecommendationItem(
-                    mealType = item.type,
-                    menuName = item.name,
-                    desc = "${item.kcal.toInt()} kcal • ${item.tags}",
-                    icon = item.icon,
-                    onAdd = {
-                        onAddFood(item.name, item.kcal, item.protein, item.carbs, item.fats)
-                    }
+            if (suggestionResponse == null) {
+                Box(modifier = Modifier.fillMaxWidth().height(100.dp), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(color = Color(0xFF4CAF50))
+                }
+            } else {
+                Text(
+                    suggestionResponse.suggestion,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(bottom = 12.dp)
                 )
-                Spacer(Modifier.height(12.dp))
+
+                suggestionResponse.mealSuggestions.forEach { item ->
+                    val icon = when (item.type.lowercase()) {
+                        "breakfast" -> Icons.Rounded.BakeryDining
+                        "lunch" -> Icons.Rounded.SetMeal
+                        else -> Icons.Rounded.Fastfood
+                    }
+                    DietRecommendationItem(
+                        mealType = "${item.type} 推薦",
+                        menuName = item.name,
+                        desc = "${item.calories.toInt()} kcal • ${item.tags}",
+                        icon = icon,
+                        onAdd = {
+                            onAddFood(item.name, item.calories, item.protein, item.carbs, item.fats)
+                        }
+                    )
+                    Spacer(Modifier.height(12.dp))
+                }
             }
         }
     }
 }
 
-data class DietSuggestion(
-    val type: String,
-    val name: String,
-    val kcal: Double,
-    val tags: String,
-    val icon: ImageVector,
-    val protein: Double,
-    val carbs: Double,
-    val fats: Double
-)
+@Composable
+fun AiSuggestedExerciseSection(
+    suggestionResponse: HealthSuggestionResponse?,
+    onAddExercise: (String, Double, Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (suggestionResponse == null || suggestionResponse.exerciseSuggestions.isEmpty()) return
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        Text(
+            "AI 推薦運動計畫",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            color = VitaMindBrown,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        suggestionResponse.exerciseSuggestions.forEach { item ->
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                shape = RoundedCornerShape(16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        color = Color(0xFFE8F5E9),
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(Icons.AutoMirrored.Rounded.DirectionsRun, null, tint = Color(0xFF4CAF50), modifier = Modifier.size(20.dp))
+                        }
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(item.name, fontSize = 14.sp, fontWeight = FontWeight.Bold, color = VitaMindDarkBrown)
+                        Text("${item.durationMinutes}分鐘 • ${item.caloriesBurned.toInt()} kcal • ${item.intensity}", fontSize = 11.sp, color = Color.Gray)
+                    }
+                    IconButton(
+                        onClick = { onAddExercise(item.name, item.caloriesBurned, item.durationMinutes) },
+                        modifier = Modifier.size(32.dp).background(Color(0xFF4CAF50), CircleShape)
+                    ) {
+                        Icon(Icons.Rounded.Add, null, tint = Color.White, modifier = Modifier.size(18.dp))
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Composable
 fun DietRecommendationItem(mealType: String, menuName: String, desc: String, icon: ImageVector, onAdd: () -> Unit) {

@@ -21,6 +21,18 @@ class AiRepository(
     private val exerciseAdapter = moshi.adapter(ExerciseAnalysisResponse::class.java)
     private val suggestionAdapter = moshi.adapter(HealthSuggestionResponse::class.java)
 
+    fun parseSuggestionJson(json: String): HealthSuggestionResponse? {
+        return try {
+            suggestionAdapter.fromJson(json)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun suggestionToJson(suggestion: HealthSuggestionResponse): String {
+        return suggestionAdapter.toJson(suggestion)
+    }
+
     suspend fun analyzeFood(bitmap: Bitmap, provider: AiProvider): FoodAnalysisResponse? = withContext(Dispatchers.IO) {
         try {
             val prompt = """
@@ -170,7 +182,23 @@ class AiRepository(
 
     suspend fun generateHealthSuggestion(profile: String, logs: String, provider: AiProvider): HealthSuggestionResponse? = withContext(Dispatchers.IO) {
         try {
-            val prompt = "Based on the user's profile: $profile and recent logs: $logs, provide a daily health suggestion. Format as JSON: { \"title\": \"...\", \"suggestion\": \"...\" }. Only return the JSON."
+            val prompt = """
+                Based on the user's profile: $profile and recent logs: $logs, provide a daily health suggestion. 
+                Format as JSON with the following structure:
+                {
+                  "title": "...",
+                  "suggestion": "...",
+                  "mealSuggestions": [
+                    { "type": "Breakfast", "name": "...", "calories": 0.0, "protein": 0.0, "carbs": 0.0, "fats": 0.0, "description": "...", "tags": "..." },
+                    { "type": "Lunch", "name": "...", "calories": 0.0, "protein": 0.0, "carbs": 0.0, "fats": 0.0, "description": "...", "tags": "..." },
+                    { "type": "Dinner", "name": "...", "calories": 0.0, "protein": 0.0, "carbs": 0.0, "fats": 0.0, "description": "...", "tags": "..." }
+                  ],
+                  "exerciseSuggestions": [
+                    { "name": "...", "caloriesBurned": 0.0, "durationMinutes": 0, "intensity": "..." }
+                  ]
+                }
+                Only return the JSON.
+            """.trimIndent()
             val json = when (provider) {
                 AiProvider.GEMINI -> {
                     val apiKey = secureStorage.getApiKey(SecureStorage.KEY_GEMINI) ?: return@withContext null

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.osen.sanoai.data.api.AiProvider
 import com.osen.sanoai.data.api.model.ChatMessage
 import com.osen.sanoai.data.api.model.FoodAnalysisResponse
+import com.osen.sanoai.data.api.model.HealthSuggestionResponse
 import com.osen.sanoai.data.backup.GoogleDriveService
 import com.osen.sanoai.data.local.entities.DailySuggestion
 import com.osen.sanoai.data.local.entities.ExerciseLog
@@ -34,8 +35,8 @@ class HealthViewModel(
     private val googleDriveService: GoogleDriveService
 ) : ViewModel() {
 
-    private val _suggestionState = MutableStateFlow("Loading suggestions...")
-    val suggestionState: StateFlow<String> = _suggestionState.asStateFlow()
+    private val _suggestionState = MutableStateFlow<HealthSuggestionResponse?>(null)
+    val suggestionState: StateFlow<HealthSuggestionResponse?> = _suggestionState.asStateFlow()
 
     private val _selectedDate = MutableStateFlow(System.currentTimeMillis())
     val selectedDate: StateFlow<Long> = _selectedDate.asStateFlow()
@@ -179,12 +180,14 @@ class HealthViewModel(
             if (!forceRefresh) {
                 val cached = repository.getCachedSuggestion(dateKey)
                 if (cached != null) {
-                    _suggestionState.value = cached.suggestion
+                    // Try to parse cached JSON if possible, or handle it as plain text if it was stored that way
+                    // For now, let's assume we store the JSON in the 'suggestion' field
+                    _suggestionState.value = repository.parseSuggestionJson(cached.suggestion)
                     return@launch
                 }
             }
 
-            _suggestionState.value = "Consulting AI..."
+            _suggestionState.value = null // Reset while loading
             val profile = userProfile.value?.toString() ?: "No profile"
             
             // Get the daily logs specifically for this suggestion
@@ -195,14 +198,19 @@ class HealthViewModel(
             val logs = "Food: $food, Exercise: $exercise"
             val suggestionResponse = repository.generateHealthSuggestion(profile, logs, provider)
             
-            val suggestionText = suggestionResponse?.suggestion ?: "No insights for this date."
-            _suggestionState.value = suggestionText
-            
-            repository.saveSuggestion(DailySuggestion(
-                date = dateKey,
-                suggestion = suggestionText,
-                timestamp = System.currentTimeMillis()
-            ))
+            if (suggestionResponse != null) {
+                _suggestionState.value = suggestionResponse
+                
+                // We'll store the JSON string in the database
+                val jsonToCache = repository.toJson(suggestionResponse)
+                repository.saveSuggestion(DailySuggestion(
+                    date = dateKey,
+                    suggestion = jsonToCache,
+                    timestamp = System.currentTimeMillis()
+                ))
+            } else {
+                _suggestionState.value = HealthSuggestionResponse(title = "No insights", suggestion = "Could not reach AI.")
+            }
         }
     }
 

@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import com.osen.sanoai.data.api.AiProvider
 import com.osen.sanoai.data.api.AiRepository
 import com.osen.sanoai.data.api.model.ChatMessage
+import com.osen.sanoai.data.api.model.HealthSuggestionResponse
 import com.osen.sanoai.data.local.dao.HealthDao
 import com.osen.sanoai.data.local.entities.DailySuggestion
 import com.osen.sanoai.data.local.entities.ExerciseLog
@@ -49,6 +50,9 @@ class HealthRepository(
 
     suspend fun chatWithConsultant(message: String, profile: String, logs: String, history: List<ChatMessage>, provider: AiProvider) =
         aiRepository.chatWithConsultant(message, profile, logs, history, provider)
+
+    fun parseSuggestionJson(json: String) = aiRepository.parseSuggestionJson(json)
+    fun toJson(suggestion: HealthSuggestionResponse) = aiRepository.suggestionToJson(suggestion)
 
     // API Keys
     fun saveApiKey(provider: String, apiKey: String) = secureStorage.saveApiKey(provider, apiKey)

@@ -36,5 +36,27 @@ data class ExerciseAnalysisResponse(
 @JsonClass(generateAdapter = true)
 data class HealthSuggestionResponse(
     val title: String,
-    val suggestion: String
+    val suggestion: String,
+    val mealSuggestions: List<MealSuggestion> = emptyList(),
+    val exerciseSuggestions: List<ExerciseSuggestion> = emptyList()
+)
+
+@JsonClass(generateAdapter = true)
+data class MealSuggestion(
+    val type: String, // e.g., "Breakfast", "Lunch", "Dinner"
+    val name: String,
+    val calories: Double,
+    val protein: Double,
+    val carbs: Double,
+    val fats: Double,
+    val description: String,
+    val tags: String
+)
+
+@JsonClass(generateAdapter = true)
+data class ExerciseSuggestion(
+    val name: String,
+    val caloriesBurned: Double,
+    val durationMinutes: Int,
+    val intensity: String
 )
