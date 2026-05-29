@@ -38,12 +38,12 @@ fun SettingsScreen(viewModel: HealthViewModel) {
     val profile by viewModel.userProfile.collectAsState()
     val currentAiProvider by viewModel.selectedAiProvider.collectAsState()
 
-    var weight by remember { mutableStateOf(profile?.weight?.toString() ?: "") }
-    var height by remember { mutableStateOf(profile?.height?.toString() ?: "") }
-    var bodyFat by remember { mutableStateOf(profile?.bodyFat?.toString() ?: "") }
-    var goal by remember { mutableStateOf(profile?.goal ?: "") }
+    var weight by remember(profile) { mutableStateOf(profile?.weight?.toString() ?: "") }
+    var height by remember(profile) { mutableStateOf(profile?.height?.toString() ?: "") }
+    var bodyFat by remember(profile) { mutableStateOf(profile?.bodyFat?.toString() ?: "") }
+    var goal by remember(profile) { mutableStateOf(profile?.goal ?: "") }
 
-    var selectedProvider by remember { mutableStateOf(currentAiProvider) }
+    var selectedProvider by remember(currentAiProvider) { mutableStateOf(currentAiProvider) }
     
     // Model Selections for each provider
     var selectedGeminiModel by remember { mutableStateOf(viewModel.getSelectedModel(AiProvider.GEMINI)) }
