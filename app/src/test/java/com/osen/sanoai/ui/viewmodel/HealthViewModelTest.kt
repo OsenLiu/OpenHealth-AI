@@ -48,6 +48,10 @@ class HealthViewModelTest {
         `when`(repository.getAllWeightRecords()).thenReturn(flowOf(emptyList()))
         `when`(repository.getAllFoodLogs()).thenReturn(flowOf(emptyList()))
         `when`(repository.getAllExerciseLogs()).thenReturn(flowOf(emptyList()))
+        
+        // Mock date-range queries
+        `when`(repository.getFoodLogsInRange(any(), any())).thenReturn(flowOf(emptyList()))
+        `when`(repository.getExerciseLogsInRange(any(), any())).thenReturn(flowOf(emptyList()))
 
         viewModel = HealthViewModel(repository, googleDriveService)
     }
@@ -75,13 +79,12 @@ class HealthViewModelTest {
     @Test
     fun `addWeight adds record and updates profile`() = runTest {
         val profile = UserProfile(weight = 70.0, height = 170.0, bodyFat = 15.0, goal = "Healthy")
-        // Use a simple Flow to avoid collect issues in some environments
         `when`(repository.getUserProfile()).thenReturn(flowOf(profile))
         
         // Re-init viewModel to pick up the mock flow
         viewModel = HealthViewModel(repository, googleDriveService)
 
-        // Kick off the shared flow by collecting
+        // Force collection in a separate job
         backgroundScope.launch { viewModel.userProfile.collect {} }
         advanceUntilIdle()
 
@@ -99,7 +102,7 @@ class HealthViewModelTest {
 
         viewModel.suggestionState.test {
             assertEquals("Loading suggestions...", awaitItem())
-            viewModel.fetchDailySuggestion(AiProvider.GEMINI)
+            viewModel.fetchDailySuggestion(AiProvider.GEMINI, System.currentTimeMillis())
             assertEquals("Cached suggestion", awaitItem())
         }
     }
@@ -112,7 +115,7 @@ class HealthViewModelTest {
 
         viewModel.suggestionState.test {
             assertEquals("Loading suggestions...", awaitItem())
-            viewModel.fetchDailySuggestion(AiProvider.GEMINI)
+            viewModel.fetchDailySuggestion(AiProvider.GEMINI, System.currentTimeMillis())
             
             assertEquals("Consulting AI...", awaitItem())
             assertEquals("New AI suggestion", awaitItem())

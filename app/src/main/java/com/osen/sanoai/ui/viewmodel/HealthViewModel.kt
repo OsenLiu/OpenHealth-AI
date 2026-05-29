@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -160,9 +161,9 @@ class HealthViewModel(
     suspend fun analyzeExercise(description: String, provider: AiProvider) = 
         repository.analyzeExercise(description, provider)
 
-    fun fetchDailySuggestion(provider: AiProvider, forceRefresh: Boolean = false) {
+    fun fetchDailySuggestion(provider: AiProvider, date: Long, forceRefresh: Boolean = false) {
         viewModelScope.launch {
-            val dateKey = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+            val dateKey = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(date))
             
             if (!forceRefresh) {
                 val cached = repository.getCachedSuggestion(dateKey)
@@ -174,10 +175,16 @@ class HealthViewModel(
 
             _suggestionState.value = "Consulting AI..."
             val profile = userProfile.value?.toString() ?: "No profile"
-            val logs = "Food: ${foodLogs.value.take(5)}, Exercise: ${exerciseLogs.value.take(5)}"
+            
+            // Get the daily logs specifically for this suggestion
+            val range = getDayRange(date)
+            val food = repository.getFoodLogsInRange(range.first, range.second).first().take(10)
+            val exercise = repository.getExerciseLogsInRange(range.first, range.second).first().take(10)
+            
+            val logs = "Food: $food, Exercise: $exercise"
             val suggestionResponse = repository.generateHealthSuggestion(profile, logs, provider)
             
-            val suggestionText = suggestionResponse?.suggestion ?: "Keep going!"
+            val suggestionText = suggestionResponse?.suggestion ?: "No insights for this date."
             _suggestionState.value = suggestionText
             
             repository.saveSuggestion(DailySuggestion(

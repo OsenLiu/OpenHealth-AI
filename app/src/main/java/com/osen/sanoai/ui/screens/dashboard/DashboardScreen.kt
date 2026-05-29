@@ -26,6 +26,7 @@ import com.osen.sanoai.data.api.AiProvider
 import com.osen.sanoai.data.local.entities.ExerciseLog
 import com.osen.sanoai.data.local.entities.FoodLog
 import com.osen.sanoai.ui.components.OrganicBlobShape
+import com.osen.sanoai.ui.components.SpeechBubbleShape
 import com.osen.sanoai.ui.theme.*
 import com.osen.sanoai.ui.viewmodel.HealthViewModel
 import java.text.SimpleDateFormat
@@ -45,22 +46,64 @@ fun DashboardScreen(
     val foodLogs by viewModel.dailyFoodLogs.collectAsState()
     val exerciseLogs by viewModel.dailyExerciseLogs.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchDailySuggestion(AiProvider.GEMINI)
+    var showDatePicker by remember { mutableStateOf(false) }
+
+    val dateStr = remember(selectedDate) {
+        SimpleDateFormat("MMM dd, yyyy", Locale.getDefault()).format(Date(selectedDate))
+    }
+
+    LaunchedEffect(selectedDate) {
+        viewModel.fetchDailySuggestion(AiProvider.GEMINI, selectedDate)
+    }
+
+    if (showDatePicker) {
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = selectedDate
+        )
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    datePickerState.selectedDateMillis?.let {
+                        viewModel.setSelectedDate(it)
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "SanoAI",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = VitaMindDarkBrown
-                    )
+                    Column {
+                        Text(
+                            "SanoAI Dashboard",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = VitaMindDarkBrown
+                        )
+                        Text(
+                            text = dateStr,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = VitaMindBrown
+                        )
+                    }
                 },
                 actions = {
+                    IconButton(onClick = { showDatePicker = true }) {
+                        Icon(Icons.Rounded.CalendarMonth, "Select Date", tint = VitaMindBrown)
+                    }
                     IconButton(onClick = onNavigateToChat) {
                         Icon(Icons.Rounded.AutoAwesome, "AI Assistant", tint = Color(0xFFD84315))
                     }
@@ -143,6 +186,7 @@ fun DashboardScreen(
             item {
                 AiPrescriptionCard(
                     suggestion = suggestion,
+                    onRefresh = { viewModel.fetchDailySuggestion(AiProvider.GEMINI, selectedDate, forceRefresh = true) },
                     onChat = onNavigateToChat,
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
@@ -153,11 +197,19 @@ fun DashboardScreen(
 
 @Composable
 fun DateSwitcher(selectedDate: Long, onDateSelected: (Long) -> Unit) {
-    val dates = (0..6).map { i ->
-        val cal = Calendar.getInstance()
-        cal.add(Calendar.DAY_OF_YEAR, -i)
-        cal.timeInMillis
-    }.reversed()
+    // Generate dates around the selected date
+    val dates = remember(selectedDate) {
+        (-3..3).map { i ->
+            Calendar.getInstance().apply {
+                timeInMillis = selectedDate
+                add(Calendar.DAY_OF_YEAR, i)
+                set(Calendar.HOUR_OF_DAY, 0)
+                set(Calendar.MINUTE, 0)
+                set(Calendar.SECOND, 0)
+                set(Calendar.MILLISECOND, 0)
+            }.timeInMillis
+        }
+    }
 
     LazyRow(
         modifier = Modifier.fillMaxWidth(),
@@ -415,7 +467,7 @@ fun Tag(label: String, bgColor: Color, textColor: Color) {
 }
 
 @Composable
-fun AiPrescriptionCard(suggestion: String, onChat: () -> Unit, modifier: Modifier = Modifier) {
+fun AiPrescriptionCard(suggestion: String, onRefresh: () -> Unit, onChat: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color(0xFFE8F5E9).copy(alpha = 0.7f)),
@@ -439,10 +491,15 @@ fun AiPrescriptionCard(suggestion: String, onChat: () -> Unit, modifier: Modifie
             Spacer(Modifier.height(20.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                 Text("基於本機 API 連接安全運行", fontSize = 11.sp, color = VitaMindBrown.copy(alpha = 0.6f))
-                TextButton(onClick = onChat, contentPadding = PaddingValues(0.dp)) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("對話尋求更深建議", color = Color(0xFF2E7D32), fontSize = 13.sp, fontWeight = FontWeight.Bold)
-                        Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, modifier = Modifier.size(16.dp), tint = Color(0xFF2E7D32))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    TextButton(onClick = onRefresh, contentPadding = PaddingValues(horizontal = 8.dp)) {
+                        Text("刷新", color = Color(0xFF2E7D32), fontSize = 13.sp)
+                    }
+                    TextButton(onClick = onChat, contentPadding = PaddingValues(0.dp)) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("對話建議", color = Color(0xFF2E7D32), fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, null, modifier = Modifier.size(16.dp), tint = Color(0xFF2E7D32))
+                        }
                     }
                 }
             }
