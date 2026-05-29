@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -131,6 +132,7 @@ fun DashboardScreen(
             // 2. Calorie Summary Card
             item {
                 CalorieSummaryCard(
+                    selectedDate = selectedDate,
                     consumed = dailySummary.totalCaloriesConsumed,
                     burned = dailySummary.totalCaloriesBurned,
                     goal = 2000.0, // Assuming a default goal
@@ -199,7 +201,7 @@ fun DashboardScreen(
 fun DateSwitcher(selectedDate: Long, onDateSelected: (Long) -> Unit) {
     // Generate dates around the selected date
     val dates = remember(selectedDate) {
-        (-3..3).map { i ->
+        (-15..15).map { i ->
             Calendar.getInstance().apply {
                 timeInMillis = selectedDate
                 add(Calendar.DAY_OF_YEAR, i)
@@ -211,7 +213,17 @@ fun DateSwitcher(selectedDate: Long, onDateSelected: (Long) -> Unit) {
         }
     }
 
+    val listState = rememberLazyListState()
+
+    // Ensure the selected date is centered when it changes
+    LaunchedEffect(selectedDate) {
+        // The selected date is at index 15 (center of -15..15)
+        // Adjust for item width and spacing if possible, but animateScrollToItem(13) is a good approximation to show it centered
+        listState.animateScrollToItem(13) 
+    }
+
     LazyRow(
+        state = listState,
         modifier = Modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -252,8 +264,14 @@ private fun isSameDay(t1: Long, t2: Long): Boolean {
 }
 
 @Composable
-fun CalorieSummaryCard(consumed: Double, burned: Double, goal: Double, modifier: Modifier = Modifier) {
+fun CalorieSummaryCard(selectedDate: Long, consumed: Double, burned: Double, goal: Double, modifier: Modifier = Modifier) {
     val progress = (consumed / goal).coerceIn(0.0, 1.0).toFloat()
+    
+    val formattedDate = remember(selectedDate) {
+        val isToday = isSameDay(selectedDate, System.currentTimeMillis())
+        val baseFormat = SimpleDateFormat("M 月 d 日", Locale.getDefault()).format(Date(selectedDate))
+        if (isToday) "$baseFormat (今天)" else baseFormat
+    }
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -265,7 +283,7 @@ fun CalorieSummaryCard(consumed: Double, burned: Double, goal: Double, modifier:
                 Column {
                     Text("今日卡路里結算", color = Color(0xFF81C784), fontSize = 14.sp)
                     Text(
-                        SimpleDateFormat("M 月 d 日 (今天)", Locale.getDefault()).format(Date()),
+                        formattedDate,
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold

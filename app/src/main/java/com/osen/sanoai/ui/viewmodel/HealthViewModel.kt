@@ -102,7 +102,14 @@ class HealthViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     fun setSelectedDate(timestamp: Long) {
-        _selectedDate.value = timestamp
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = timestamp
+            set(Calendar.HOUR_OF_DAY, 0)
+            set(Calendar.MINUTE, 0)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+        _selectedDate.value = calendar.timeInMillis
     }
 
     private fun getDayRange(timestamp: Long): Pair<Long, Long> {
