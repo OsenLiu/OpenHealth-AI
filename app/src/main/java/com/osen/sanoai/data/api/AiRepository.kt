@@ -2,6 +2,7 @@ package com.osen.sanoai.data.api
 
 import android.graphics.Bitmap
 import android.util.Base64
+import android.util.Log
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.osen.sanoai.data.api.client.OpenAiApi
@@ -20,6 +21,10 @@ class AiRepository(
     private val foodAdapter = moshi.adapter(FoodAnalysisResponse::class.java)
     private val exerciseAdapter = moshi.adapter(ExerciseAnalysisResponse::class.java)
     private val suggestionAdapter = moshi.adapter(HealthSuggestionResponse::class.java)
+
+    companion object {
+        private const val TAG = "AiRepository"
+    }
 
     fun parseSuggestionJson(json: String): HealthSuggestionResponse? {
         return try {
@@ -57,6 +62,10 @@ class AiRepository(
                 }
                 Only return the JSON.
             """.trimIndent()
+            
+            Log.d(TAG, "[analyzeFood] Provider: $provider, Model: $modelName")
+            Log.d(TAG, "[analyzeFood] Prompt: $prompt")
+
             val json = when (provider) {
                 AiProvider.GEMINI -> {
                     val apiKey = secureStorage.getApiKey(SecureStorage.KEY_GEMINI) ?: return@withContext null
@@ -89,9 +98,12 @@ class AiRepository(
                     response.choices.firstOrNull()?.message?.content
                 }
             }
+            
+            Log.d(TAG, "[analyzeFood] Raw Response: $json")
+
             json?.let { extractJson(it) }?.let { foodAdapter.fromJson(it) }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "[analyzeFood] Error: ${e.message}", e)
             null
         }
     }
@@ -120,6 +132,10 @@ class AiRepository(
                 }
                 Only return the JSON.
             """.trimIndent()
+            
+            Log.d(TAG, "[analyzeFoodText] Provider: $provider, Model: $modelName")
+            Log.d(TAG, "[analyzeFoodText] Prompt: $prompt")
+
             val json = when (provider) {
                 AiProvider.GEMINI -> {
                     val apiKey = secureStorage.getApiKey(SecureStorage.KEY_GEMINI) ?: return@withContext null
@@ -140,9 +156,12 @@ class AiRepository(
                     response.choices.firstOrNull()?.message?.content
                 }
             }
+            
+            Log.d(TAG, "[analyzeFoodText] Raw Response: $json")
+
             json?.let { extractJson(it) }?.let { foodAdapter.fromJson(it) }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "[analyzeFoodText] Error: ${e.message}", e)
             null
         }
     }
@@ -150,6 +169,10 @@ class AiRepository(
     suspend fun analyzeExercise(description: String, provider: AiProvider, modelName: String): ExerciseAnalysisResponse? = withContext(Dispatchers.IO) {
         try {
             val prompt = "Estimate the calories burned for this exercise: '$description'. Provide the name, estimated calories burned, and duration in minutes in JSON format: { \"name\": \"...\", \"caloriesBurned\": 0.0, \"durationMinutes\": 0 }. Only return the JSON."
+            
+            Log.d(TAG, "[analyzeExercise] Provider: $provider, Model: $modelName")
+            Log.d(TAG, "[analyzeExercise] Prompt: $prompt")
+
             val json = when (provider) {
                 AiProvider.GEMINI -> {
                     val apiKey = secureStorage.getApiKey(SecureStorage.KEY_GEMINI) ?: return@withContext null
@@ -170,9 +193,12 @@ class AiRepository(
                     response.choices.firstOrNull()?.message?.content
                 }
             }
+            
+            Log.d(TAG, "[analyzeExercise] Raw Response: $json")
+
             json?.let { extractJson(it) }?.let { exerciseAdapter.fromJson(it) }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "[analyzeExercise] Error: ${e.message}", e)
             null
         }
     }
@@ -196,6 +222,10 @@ class AiRepository(
                 }
                 Only return the JSON.
             """.trimIndent()
+            
+            Log.d(TAG, "[generateHealthSuggestion] Provider: $provider, Model: $modelName")
+            Log.d(TAG, "[generateHealthSuggestion] Prompt: $prompt")
+
             val json = when (provider) {
                 AiProvider.GEMINI -> {
                     val apiKey = secureStorage.getApiKey(SecureStorage.KEY_GEMINI) ?: return@withContext null
@@ -216,9 +246,12 @@ class AiRepository(
                     response.choices.firstOrNull()?.message?.content
                 }
             }
+            
+            Log.d(TAG, "[generateHealthSuggestion] Raw Response: $json")
+
             json?.let { extractJson(it) }?.let { suggestionAdapter.fromJson(it) }
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "[generateHealthSuggestion] Error: ${e.message}", e)
             null
         }
     }
@@ -236,7 +269,11 @@ class AiRepository(
                     "User Profile: $profile. Recent Logs: $logs. " +
                     "Provide helpful, concise, and evidence-based health and sports advice based on this context."
 
-            when (provider) {
+            Log.d(TAG, "[chatWithConsultant] Provider: $provider, Model: $modelName")
+            Log.d(TAG, "[chatWithConsultant] System Prompt: $systemPrompt")
+            Log.d(TAG, "[chatWithConsultant] User Message: $message")
+
+            val responseContent = when (provider) {
                 AiProvider.GEMINI -> {
                     val apiKey = secureStorage.getApiKey(SecureStorage.KEY_GEMINI) ?: return@withContext null
                     val model = GenerativeModel(modelName = modelName, apiKey = apiKey)
@@ -263,8 +300,11 @@ class AiRepository(
                     response.choices.firstOrNull()?.message?.content
                 }
             }
+            
+            Log.d(TAG, "[chatWithConsultant] AI Response: $responseContent")
+            responseContent
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e(TAG, "[chatWithConsultant] Error: ${e.message}", e)
             null
         }
     }
