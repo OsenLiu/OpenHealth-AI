@@ -1,3 +1,48 @@
 <resources>
     <string name="app_name">SanoAI</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="calorie_summary">Today\'s Calorie Summary</string>
+    <string name="intake_rate">Intake Rate</string>
+    <string name="consumed">Consumed :</string>
+    <string name="burned">Burned :</string>
+    <string name="burned_already">Burned %d kcal</string>
+    <string name="macronutrients">Macronutrients</string>
+    <string name="carbs">Carbs</string>
+    <string name="protein">Protein</string>
+    <string name="fats">Fats</string>
+    <string name="diet_list">Diet Intake List</string>
+    <string name="add_food">Add Food</string>
+    <string name="exercise_plan">Daily Exercise Plan</string>
+    <string name="add_exercise">Add Exercise</string>
+    <string name="completed_status">Completed %1$d/%2$d</string>
+    <string name="ai_diet_menu">AI Suggested Diet Menu</string>
+    <string name="ai_exercise_plan">AI Recommended Exercise Plan</string>
+    <string name="refresh_suggestion">Refresh Suggestions</string>
+    <string name="precise_calories">Precise Calorie Control</string>
+    <string name="recommendation_prefix">%s Rec</string>
+    <string name="today">Today</string>
+    <string name="date_format">MMM dd</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="user_profile">User Profile</string>
+    <string name="weight_label">Weight (kg)</string>
+    <string name="height_label">Height (cm)</string>
+    <string name="body_fat_label">Body Fat (%)</string>
+    <string name="health_goal_label">Health Goal</string>
+    <string name="ai_config">AI Configuration</string>
+    <string name="preferred_ai_provider">Preferred AI Provider</string>
+    <string name="api_keys">API Keys</string>
+    <string name="save_all_settings">Save All Settings</string>
+    <string name="connect_google">Connect Google Account</string>
+    <string name="backup">Backup</string>
+    <string name="restore">Restore</string>
+    <string name="settings_saved">Settings saved successfully</string>
+
+    <!-- Chat -->
+    <string name="chat_title">AI Health Consultant</string>
+    <string name="chat_placeholder">Ask anything...</string>
+    <string name="chat_welcome">Hi! I\'m your SanoAI Consultant. Ask me anything about your health or activity logs.</string>
 </resources>

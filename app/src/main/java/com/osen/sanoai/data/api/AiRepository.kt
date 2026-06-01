@@ -26,6 +26,15 @@ class AiRepository(
         private const val TAG = "AiRepository"
     }
 
+    private fun getLanguageInstruction(): String {
+        val language = java.util.Locale.getDefault().language
+        return if (language.startsWith("zh")) {
+            "Please respond in Traditional Chinese (繁體中文)."
+        } else {
+            "Please respond in English."
+        }
+    }
+
     fun parseSuggestionJson(json: String): HealthSuggestionResponse? {
         return try {
             suggestionAdapter.fromJson(json)
@@ -41,7 +50,7 @@ class AiRepository(
     suspend fun analyzeFood(bitmap: Bitmap, provider: AiProvider, modelName: String): FoodAnalysisResponse? = withContext(Dispatchers.IO) {
         try {
             val prompt = """
-                Analyze this food image. Provide the following fields in JSON format:
+                Analyze this food image. ${getLanguageInstruction()} Provide the following fields in JSON format:
                 {
                   "name": "...",
                   "calories": 0.0,
@@ -111,7 +120,7 @@ class AiRepository(
     suspend fun analyzeFoodText(description: String, provider: AiProvider, modelName: String): FoodAnalysisResponse? = withContext(Dispatchers.IO) {
         try {
             val prompt = """
-                Analyze this food description: '$description'. Provide the following fields in JSON format:
+                Analyze this food description: '$description'. ${getLanguageInstruction()} Provide the following fields in JSON format:
                 {
                   "name": "...",
                   "calories": 0.0,
@@ -168,7 +177,7 @@ class AiRepository(
 
     suspend fun analyzeExercise(description: String, provider: AiProvider, modelName: String): ExerciseAnalysisResponse? = withContext(Dispatchers.IO) {
         try {
-            val prompt = "Estimate the calories burned for this exercise: '$description'. Provide the name, estimated calories burned, and duration in minutes in JSON format: { \"name\": \"...\", \"caloriesBurned\": 0.0, \"durationMinutes\": 0 }. Only return the JSON."
+            val prompt = "Estimate the calories burned for this exercise: '$description'. ${getLanguageInstruction()} Provide the name, estimated calories burned, and duration in minutes in JSON format: { \"name\": \"...\", \"caloriesBurned\": 0.0, \"durationMinutes\": 0 }. Only return the JSON."
             
             Log.d(TAG, "[analyzeExercise] Provider: $provider, Model: $modelName")
             Log.d(TAG, "[analyzeExercise] Prompt: $prompt")
@@ -207,6 +216,7 @@ class AiRepository(
         try {
             val prompt = """
                 Based on the user's profile: $profile and recent logs: $logs, provide a daily health suggestion. 
+                ${getLanguageInstruction()}
                 Format as JSON with the following structure:
                 {
                   "title": "...",
@@ -267,6 +277,7 @@ class AiRepository(
         try {
             val systemPrompt = "You are a personalized AI Health Consultant for SanoAI. " +
                     "User Profile: $profile. Recent Logs: $logs. " +
+                    "${getLanguageInstruction()} " +
                     "Provide helpful, concise, and evidence-based health and sports advice based on this context."
 
             Log.d(TAG, "[chatWithConsultant] Provider: $provider, Model: $modelName")

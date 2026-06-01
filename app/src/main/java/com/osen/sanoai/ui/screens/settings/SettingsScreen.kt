@@ -25,6 +25,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.DriveScopes
+import androidx.compose.ui.res.stringResource
+import com.osen.sanoai.R
 import com.osen.sanoai.data.api.AiProvider
 import com.osen.sanoai.data.local.entities.UserProfile
 import com.osen.sanoai.data.secure.SecureStorage
@@ -72,7 +74,7 @@ fun SettingsScreen(viewModel: HealthViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings", color = VitaMindDarkBrown) },
+                title = { Text(stringResource(R.string.settings_title), color = VitaMindDarkBrown) },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = VitaMindBackground)
             )
         },
@@ -84,21 +86,21 @@ fun SettingsScreen(viewModel: HealthViewModel) {
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            Text("User Profile", style = MaterialTheme.typography.titleLarge, color = VitaMindDarkBrown)
+            Text(stringResource(R.string.user_profile), style = MaterialTheme.typography.titleLarge, color = VitaMindDarkBrown)
             Spacer(modifier = Modifier.height(16.dp))
-            VitaTextField(value = weight, onValueChange = { weight = it }, label = "Weight (kg)")
+            VitaTextField(value = weight, onValueChange = { weight = it }, label = stringResource(R.string.weight_label))
             Spacer(modifier = Modifier.height(12.dp))
-            VitaTextField(value = height, onValueChange = { height = it }, label = "Height (cm)")
+            VitaTextField(value = height, onValueChange = { height = it }, label = stringResource(R.string.height_label))
             Spacer(modifier = Modifier.height(12.dp))
-            VitaTextField(value = bodyFat, onValueChange = { bodyFat = it }, label = "Body Fat (%)")
+            VitaTextField(value = bodyFat, onValueChange = { bodyFat = it }, label = stringResource(R.string.body_fat_label))
             Spacer(modifier = Modifier.height(12.dp))
-            VitaTextField(value = goal, onValueChange = { goal = it }, label = "Health Goal")
+            VitaTextField(value = goal, onValueChange = { goal = it }, label = stringResource(R.string.health_goal_label))
 
             Spacer(modifier = Modifier.height(32.dp))
-            Text("AI Configuration", style = MaterialTheme.typography.titleLarge, color = VitaMindDarkBrown)
+            Text(stringResource(R.string.ai_config), style = MaterialTheme.typography.titleLarge, color = VitaMindDarkBrown)
             Spacer(modifier = Modifier.height(16.dp))
             
-            Text("Preferred AI Provider", style = MaterialTheme.typography.titleSmall, color = VitaMindBrown)
+            Text(stringResource(R.string.preferred_ai_provider), style = MaterialTheme.typography.titleSmall, color = VitaMindBrown)
             Spacer(modifier = Modifier.height(8.dp))
             
             AiProviderSelector(
@@ -136,7 +138,7 @@ fun SettingsScreen(viewModel: HealthViewModel) {
             }
 
             Spacer(modifier = Modifier.height(24.dp))
-            Text("API Keys", style = MaterialTheme.typography.titleSmall, color = VitaMindBrown)
+            Text(stringResource(R.string.api_keys), style = MaterialTheme.typography.titleSmall, color = VitaMindBrown)
             Spacer(modifier = Modifier.height(12.dp))
             
             VitaTextField(
@@ -169,7 +171,7 @@ fun SettingsScreen(viewModel: HealthViewModel) {
                 colors = ButtonDefaults.buttonColors(containerColor = VitaMindSkyBlue),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Connect Google Account", color = VitaMindDarkBrown)
+                Text(stringResource(R.string.connect_google), color = VitaMindDarkBrown)
             }
             Spacer(modifier = Modifier.height(12.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -188,7 +190,7 @@ fun SettingsScreen(viewModel: HealthViewModel) {
                     colors = ButtonDefaults.buttonColors(containerColor = VitaMindMint),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Backup", color = VitaMindDarkBrown)
+                    Text(stringResource(R.string.backup), color = VitaMindDarkBrown)
                 }
                 Button(
                     onClick = {
@@ -205,11 +207,12 @@ fun SettingsScreen(viewModel: HealthViewModel) {
                     colors = ButtonDefaults.buttonColors(containerColor = VitaMindMint),
                     shape = RoundedCornerShape(16.dp)
                 ) {
-                    Text("Restore", color = VitaMindDarkBrown)
+                    Text(stringResource(R.string.restore), color = VitaMindDarkBrown)
                 }
             }
 
             Spacer(modifier = Modifier.height(40.dp))
+            val successMsg = stringResource(R.string.settings_saved)
             Button(
                 onClick = {
                     viewModel.saveProfile(UserProfile(
@@ -227,13 +230,13 @@ fun SettingsScreen(viewModel: HealthViewModel) {
                     viewModel.setSelectedModel(AiProvider.OPENAI, selectedOpenAiModel)
                     viewModel.setSelectedModel(AiProvider.BYTEPLUS, selectedBytePlusModel)
                     
-                    Toast.makeText(context, "Settings saved successfully", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, successMsg, Toast.LENGTH_SHORT).show()
                 },
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = VitaMindCoral),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Text("Save All Settings", color = VitaMindDarkBrown, style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.save_all_settings), color = VitaMindDarkBrown, style = MaterialTheme.typography.titleMedium)
             }
             Spacer(modifier = Modifier.height(32.dp))
         }

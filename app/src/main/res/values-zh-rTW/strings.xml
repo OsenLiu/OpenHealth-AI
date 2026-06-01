@@ -1,0 +1,48 @@
+<resources>
+    <string name="app_name">SanoAI</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">健康儀表板</string>
+    <string name="calorie_summary">今日卡路里結算</string>
+    <string name="intake_rate">攝取率</string>
+    <string name="consumed">吃進去 :</string>
+    <string name="burned">運動燒 :</string>
+    <string name="burned_already">已燃燒 %d kcal</string>
+    <string name="macronutrients">三大營養素攝取狀況</string>
+    <string name="carbs">碳水化合物</string>
+    <string name="protein">蛋白質</string>
+    <string name="fats">脂肪</string>
+    <string name="diet_list">飲食攝取清單</string>
+    <string name="add_food">新增食物</string>
+    <string name="exercise_plan">當天運動計畫 (點擊勾選完成)</string>
+    <string name="add_exercise">新增運動</string>
+    <string name="completed_status">已完成 %1$d/%2$d</string>
+    <string name="ai_diet_menu">AI 智慧建議飲食菜單</string>
+    <string name="ai_exercise_plan">AI 推薦運動計畫</string>
+    <string name="refresh_suggestion">刷新建議</string>
+    <string name="precise_calories">精準控制卡路里</string>
+    <string name="recommendation_prefix">%s 推薦</string>
+    <string name="today">今天</string>
+    <string name="date_format">M 月 d 日</string>
+
+    <!-- Settings -->
+    <string name="settings_title">設定</string>
+    <string name="user_profile">使用者個人檔案</string>
+    <string name="weight_label">體重 (kg)</string>
+    <string name="height_label">身高 (cm)</string>
+    <string name="body_fat_label">體脂率 (%)</string>
+    <string name="health_goal_label">健康目標</string>
+    <string name="ai_config">AI 配置</string>
+    <string name="preferred_ai_provider">偏好的 AI 供應商</string>
+    <string name="api_keys">API 金鑰</string>
+    <string name="save_all_settings">儲存所有設定</string>
+    <string name="connect_google">連結 Google 帳號</string>
+    <string name="backup">備份資料</string>
+    <string name="restore">還原資料</string>
+    <string name="settings_saved">設定儲存成功</string>
+
+    <!-- Chat -->
+    <string name="chat_title">AI 健康顧問</string>
+    <string name="chat_placeholder">請輸入您的問題…</string>
+    <string name="chat_welcome">您好！我是您的 SanoAI 顧問。您可以詢問任何關於健康或運動紀錄的問題。</string>
+</resources>

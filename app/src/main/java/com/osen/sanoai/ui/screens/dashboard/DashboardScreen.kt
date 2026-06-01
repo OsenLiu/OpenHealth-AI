@@ -27,6 +27,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import com.osen.sanoai.R
 import com.osen.sanoai.data.api.AiProvider
 import com.osen.sanoai.data.api.model.HealthSuggestionResponse
 import com.osen.sanoai.data.local.entities.ExerciseLog
@@ -95,7 +97,7 @@ fun DashboardScreen(
                 title = {
                     Column {
                         Text(
-                            "SanoAI Dashboard",
+                            stringResource(R.string.dashboard_title),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = VitaMindDarkBrown
@@ -109,10 +111,10 @@ fun DashboardScreen(
                 },
                 actions = {
                     IconButton(onClick = { showDatePicker = true }) {
-                        Icon(Icons.Rounded.CalendarMonth, "Select Date", tint = VitaMindBrown)
+                        Icon(Icons.Rounded.CalendarMonth, stringResource(R.string.settings_title), tint = VitaMindBrown)
                     }
                     IconButton(onClick = onNavigateToChat) {
-                        Icon(Icons.Rounded.AutoAwesome, "AI Assistant", tint = Color(0xFFD84315))
+                        Icon(Icons.Rounded.AutoAwesome, stringResource(R.string.chat_title), tint = Color(0xFFD84315))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = VitaMindBackground)
@@ -150,7 +152,7 @@ fun DashboardScreen(
             // 3. Macronutrients
             item {
                 Text(
-                    "三大營養素攝取狀況",
+                    stringResource(R.string.macronutrients),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                     color = VitaMindBrown,
@@ -163,16 +165,16 @@ fun DashboardScreen(
                         .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    MacroCard("碳水化合物", "${dailySummary.totalCarbs.toInt()}g", dailySummary.carbsPercentage, Color(0xFF4CAF50), Modifier.weight(1f))
-                    MacroCard("蛋白質", "${dailySummary.totalProtein.toInt()}g", dailySummary.proteinPercentage, Color(0xFF2196F3), Modifier.weight(1f))
-                    MacroCard("脂肪", "${dailySummary.totalFats.toInt()}g", dailySummary.fatsPercentage, Color(0xFFFF9800), Modifier.weight(1f))
+                    MacroCard(stringResource(R.string.carbs), "${dailySummary.totalCarbs.toInt()}g", dailySummary.carbsPercentage, Color(0xFF4CAF50), Modifier.weight(1f))
+                    MacroCard(stringResource(R.string.protein), "${dailySummary.totalProtein.toInt()}g", dailySummary.proteinPercentage, Color(0xFF2196F3), Modifier.weight(1f))
+                    MacroCard(stringResource(R.string.fats), "${dailySummary.totalFats.toInt()}g", dailySummary.fatsPercentage, Color(0xFFFF9800), Modifier.weight(1f))
                 }
                 Spacer(Modifier.height(24.dp))
             }
 
             // 4. Diet Intake List
             item {
-                SectionHeader("飲食攝取清單", "新增食物", onNavigateToFood)
+                SectionHeader(stringResource(R.string.diet_list), stringResource(R.string.add_food), onNavigateToFood)
             }
             items(foodLogs) { log ->
                 FoodLogItem(log, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
@@ -196,7 +198,7 @@ fun DashboardScreen(
                         Icon(Icons.AutoMirrored.Rounded.DirectionsRun, null, tint = Color(0xFF4CAF50), modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            "當天運動計畫 (點擊勾選完成)",
+                            stringResource(R.string.exercise_plan),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
                             color = VitaMindBrown,
@@ -213,7 +215,7 @@ fun DashboardScreen(
                             shape = RoundedCornerShape(12.dp)
                         ) {
                             Text(
-                                "已完成 $completedCount/${exerciseLogs.size}",
+                                stringResource(R.string.completed_status, completedCount, exerciseLogs.size),
                                 fontSize = 11.sp,
                                 color = VitaMindBrown.copy(alpha = 0.6f),
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -222,7 +224,7 @@ fun DashboardScreen(
                         }
                         Spacer(Modifier.width(8.dp))
                         IconButton(onClick = onNavigateToExercise, modifier = Modifier.size(24.dp)) {
-                            Icon(Icons.Default.Add, "新增運動", tint = Color(0xFF2E7D32), modifier = Modifier.size(20.dp))
+                            Icon(Icons.Default.Add, stringResource(R.string.add_exercise), tint = Color(0xFF2E7D32), modifier = Modifier.size(20.dp))
                         }
                     }
                 }
@@ -352,11 +354,12 @@ private fun isSameDay(t1: Long, t2: Long): Boolean {
 fun CalorieSummaryCard(selectedDate: Long, consumed: Double, burned: Double, goal: Double, modifier: Modifier = Modifier) {
     val progress = (consumed / goal).coerceIn(0.0, 1.0).toFloat()
     
-    val formattedDate = remember(selectedDate) {
-        val isToday = isSameDay(selectedDate, System.currentTimeMillis())
-        val baseFormat = SimpleDateFormat("M 月 d 日", Locale.getDefault()).format(Date(selectedDate))
-        if (isToday) "$baseFormat (今天)" else baseFormat
+    val dateFormat = stringResource(R.string.date_format)
+    val formattedDate = remember(selectedDate, dateFormat) {
+        SimpleDateFormat(dateFormat, Locale.getDefault()).format(Date(selectedDate))
     }
+    
+    val todaySuffix = if (isSameDay(selectedDate, System.currentTimeMillis())) " (${stringResource(R.string.today)})" else ""
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -366,9 +369,9 @@ fun CalorieSummaryCard(selectedDate: Long, consumed: Double, burned: Double, goa
         Column(modifier = Modifier.padding(20.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Column {
-                    Text("今日卡路里結算", color = Color(0xFF81C784), fontSize = 14.sp)
+                    Text(stringResource(R.string.calorie_summary), color = Color(0xFF81C784), fontSize = 14.sp)
                     Text(
-                        formattedDate,
+                        formattedDate + todaySuffix,
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold
@@ -379,7 +382,7 @@ fun CalorieSummaryCard(selectedDate: Long, consumed: Double, burned: Double, goa
                     shape = CircleShape
                 ) {
                     Text(
-                        "熱量盈餘健康",
+                        stringResource(R.string.precise_calories),
                         color = Color(0xFF81C784),
                         fontSize = 12.sp,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
@@ -409,16 +412,16 @@ fun CalorieSummaryCard(selectedDate: Long, consumed: Double, burned: Double, goa
                     }
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("${(progress * 100).toInt()}%", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                        Text("攝取率", color = Color.White.copy(alpha = 0.6f), fontSize = 10.sp)
+                        Text(stringResource(R.string.intake_rate), color = Color.White.copy(alpha = 0.6f), fontSize = 10.sp)
                     }
                 }
 
                 Spacer(Modifier.width(24.dp))
 
                 Column(modifier = Modifier.weight(1f)) {
-                    CalorieRow("吃進去 :", "${consumed.toInt()} / ${goal.toInt()} kcal", progress, Color(0xFF4CAF50))
+                    CalorieRow(stringResource(R.string.consumed), "${consumed.toInt()} / ${goal.toInt()} kcal", progress, Color(0xFF4CAF50))
                     Spacer(Modifier.height(16.dp))
-                    CalorieRow("運動燒 :", "已燃燒 ${burned.toInt()} kcal", (burned / 1000).coerceIn(0.0, 1.0).toFloat(), Color(0xFF81C784))
+                    CalorieRow(stringResource(R.string.burned), stringResource(R.string.burned_already, burned.toInt()), (burned / 1000).coerceIn(0.0, 1.0).toFloat(), Color(0xFF81C784))
                 }
             }
         }
@@ -648,7 +651,7 @@ fun AiSuggestedDietSection(
                         }
                     }
                     Spacer(Modifier.width(12.dp))
-                    Text("AI 智慧建議飲食菜單", fontWeight = FontWeight.Bold, color = Color(0xFF1B5E20), fontSize = 16.sp)
+                    Text(stringResource(R.string.ai_diet_menu), fontWeight = FontWeight.Bold, color = Color(0xFF1B5E20), fontSize = 16.sp)
                 }
                 Surface(
                     color = Color.White.copy(alpha = 0.5f),
@@ -656,7 +659,7 @@ fun AiSuggestedDietSection(
                 ) {
                     TextButton(onClick = onRefresh, contentPadding = PaddingValues(horizontal = 8.dp, vertical = 0.dp), modifier = Modifier.height(24.dp)) {
                         Text(
-                            "刷新建議",
+                            stringResource(R.string.refresh_suggestion),
                             fontSize = 10.sp,
                             color = Color(0xFF2E7D32),
                             fontWeight = FontWeight.Bold
@@ -711,7 +714,7 @@ fun AiSuggestedExerciseSection(
 
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            "AI 推薦運動計畫",
+            stringResource(R.string.ai_exercise_plan),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
             color = VitaMindBrown,
@@ -776,7 +779,7 @@ fun DietRecommendationItem(mealType: String, menuName: String, desc: String, ico
             }
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(mealType, fontSize = 11.sp, color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
+                Text(stringResource(R.string.recommendation_prefix, mealType), fontSize = 11.sp, color = Color(0xFF4CAF50), fontWeight = FontWeight.Bold)
                 Text(menuName, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = Color(0xFF212121))
                 Text(desc, fontSize = 11.sp, color = Color.LightGray)
             }

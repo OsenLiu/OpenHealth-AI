@@ -17,6 +17,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.osen.sanoai.data.api.AiProvider
+import androidx.compose.ui.res.stringResource
+import com.osen.sanoai.R
 import com.osen.sanoai.data.api.model.ChatMessage
 import com.osen.sanoai.ui.components.OrganicBlobShape
 import com.osen.sanoai.ui.theme.*
@@ -38,7 +40,7 @@ fun ChatScreen(viewModel: ChatViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("AI Health Consultant", color = VitaMindDarkBrown) },
+                title = { Text(stringResource(R.string.chat_title), color = VitaMindDarkBrown) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = VitaMindBackground,
                     titleContentColor = VitaMindDarkBrown
@@ -61,7 +63,7 @@ fun ChatScreen(viewModel: ChatViewModel) {
                         value = inputText,
                         onValueChange = { inputText = it },
                         modifier = Modifier.weight(1f),
-                        placeholder = { Text("Ask anything...", color = VitaMindBrown.copy(alpha = 0.6f)) },
+                        placeholder = { Text(stringResource(R.string.chat_placeholder), color = VitaMindBrown.copy(alpha = 0.6f)) },
                         maxLines = 4,
                         shape = RoundedCornerShape(24.dp),
                         colors = OutlinedTextFieldDefaults.colors(
@@ -119,7 +121,7 @@ fun ChatScreen(viewModel: ChatViewModel) {
                             modifier = Modifier.padding(24.dp)
                         ) {
                             Text(
-                                "Hi! I'm your SanoAI Consultant. Ask me anything about your health or activity logs.",
+                                stringResource(R.string.chat_welcome),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = VitaMindDarkBrown,
                                 modifier = Modifier.padding(32.dp),
